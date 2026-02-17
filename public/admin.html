@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel</title>
+<style>
+body{font-family:Arial;background:#f5f5f5;padding:20px}
+.box{background:white;padding:15px;margin:10px;border-radius:10px}
+</style>
+</head>
+<body>
+
+<h1>Admin Panel</h1>
+
+<h2>Add Item</h2>
+<input id="name" placeholder="Name">
+<input id="price" placeholder="Price">
+<input id="img" placeholder="Image URL">
+<button onclick="addItem()">Add</button>
+
+<h2>All Items</h2>
+<div id="items"></div>
+
+<h2>Pending Orders</h2>
+<div id="pending"></div>
+
+<h2>Completed Orders</h2>
+<div id="done"></div>
+
+<script>
+
+// ================= ITEMS =================
+function loadItems(){
+fetch("/items")
+.then(r=>r.json())
+.then(data=>{
+const d=document.getElementById("items");
+d.innerHTML="";
+data.forEach(i=>{
+d.innerHTML+=`
+<div class="box">
+<img src="${i.image_url}" width="80">
+${i.name} ₹${i.price}
+<button onclick="del(${i.id})">Delete</button>
+<button onclick="edit(${i.id})">Edit</button>
+</div>`;
+});
+});
+}
+
+function addItem(){
+fetch("/admin/add-item",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+name:document.getElementById("name").value,
+price:document.getElementById("price").value,
+image_url:document.getElementById("img").value
+})
+}).then(loadItems);
+}
+
+function del(id){
+fetch("/admin/delete-item/"+id,{method:"DELETE"})
+.then(loadItems);
+}
+
+function edit(id){
+const n=prompt("New name");
+const p=prompt("New price");
+const img=prompt("Image URL");
+
+fetch("/admin/update-item/"+id,{
+method:"PUT",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({name:n,price:p,image_url:img})
+}).then(loadItems);
+}
+
+
+// ================= ORDERS =================
+function loadOrders(){
+
+fetch("/admin/orders")
+.then(r=>r.json())
+.then(data=>{
+
+const pending=document.getElementById("pending");
+const done=document.getElementById("done");
+
+pending.innerHTML="";
+done.innerHTML="";
+
+const grouped={};
+
+data.forEach(r=>{
+if(!grouped[r.id]) grouped[r.id]={info:r,items:[]};
+if(r.item_name) grouped[r.id].items.push(r);
+});
+
+for(const id in grouped){
+
+const o=grouped[id];
+
+let html=`
+<div class="box">
+Order #${o.info.id}<br>
+${o.info.customer_name}<br>
+Total ₹${o.info.total}<br>
+Status: ${o.info.status}<br>`;
+
+o.items.forEach(i=>{
+html+=`${i.item_name} x ${i.qty}<br>`;
+});
+
+if(o.info.status==="Pending"){
+html+=`<button onclick="doneOrder(${o.info.id})">Mark Done</button>`;
+pending.innerHTML+=html+"</div>";
+}else{
+done.innerHTML+=html+"</div>";
+}
+}
+});
+}
+
+function doneOrder(id){
+fetch("/admin/order-done/"+id,{method:"PUT"})
+.then(loadOrders);
+}
+
+loadItems();
+loadOrders();
+setInterval(loadOrders,5000);
+
+</script>
+</body>
+</html>
