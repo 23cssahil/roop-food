@@ -206,7 +206,7 @@ app.put("/admin/order-done/:id", checkAdmin, (req, res) => {
 
 if (process.env.NODE_ENV === 'production' || true) {
     app.use(express.static(path.join(__dirname, 'frontend/dist')));
-    app.get('/:path*', (req, res) => {
+    app.use((req, res) => {
         res.sendFile(path.join(__dirname, 'frontend/dist', 'index.html'));
     });
 }
