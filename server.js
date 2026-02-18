@@ -24,7 +24,7 @@ const db = mysql.createConnection({
     host: process.env.DB_HOST || "localhost",
     user: process.env.DB_USER || "root",
     password: process.env.DB_PASSWORD || "S@hilkh@nmysql83183",
-    database: process.env.DB_NAME || "qr_food",
+    database: process.env.DB_NAME || process.env.DB_DATABASE || "qr_food",
     port: process.env.DB_PORT || 3306
 });
 
