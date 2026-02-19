@@ -10,7 +10,7 @@ export default function Layout() {
             </div>
             <footer className="app-footer">
                 <div className="container">
-                    <span className="footer-logo">QR<span>Food</span></span>
+                    <span className="footer-logo">Roop<span>Food</span></span>
                     <p>&copy; {new Date().getFullYear()} Gourmet QR App. Crafted for Culinary Excellence.</p>
                 </div>
             </footer>
