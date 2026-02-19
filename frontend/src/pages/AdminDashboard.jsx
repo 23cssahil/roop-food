@@ -153,10 +153,10 @@ export default function AdminDashboard() {
                                     </div>
                                 </div>
 
-                                <div className="flex items-center justify-between border-t border-slate-100 pt-4 mt-2">
+                                <div className="order-card-footer">
                                     <p className="text-lg font-black">Total: <span className="text-primary">₹{Number(order.total).toFixed(2)}</span></p>
                                     {order.status !== 'Completed' && (
-                                        <button className="btn btn-primary px-6" onClick={() => markOrderDone(order.id)}>
+                                        <button className="btn btn-primary px-6 w-full sm:w-auto" onClick={() => markOrderDone(order.id)}>
                                             Mark as Done
                                         </button>
                                     )}
