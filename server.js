@@ -12,7 +12,7 @@ const bcrypt = require("bcryptjs");
 const path = require("path");
 
 const app = express();
-const BUILD_ID = "2026-02-19-V15";
+const BUILD_ID = "2026-02-19-V16";
 console.log("=======================================");
 console.log(`🚀 APP STARTING... VERSION: ${BUILD_ID}`);
 console.log("=======================================");
@@ -242,6 +242,23 @@ app.put("/admin/update-item/:id", checkSuperAdmin, (req, res) => {
 app.delete("/admin/delete-item/:id", checkSuperAdmin, (req, res) => {
     db.query("DELETE FROM items WHERE id=?", [req.params.id],
         () => res.json({ success: true }));
+});
+
+// get daily sales (Super Admin Only)
+app.get("/admin/daily-sales", checkSuperAdmin, (req, res) => {
+    const sql = `
+        SELECT 
+            DATE_FORMAT(created_at, '%Y-%m-%d') as date,
+            SUM(total) as revenue,
+            COUNT(*) as orders
+        FROM orders 
+        GROUP BY DATE_FORMAT(created_at, '%Y-%m-%d')
+        ORDER BY date DESC
+    `;
+    db.query(sql, (err, results) => {
+        if (err) return res.status(500).json({ error: "Failed to fetch sales data" });
+        res.json(results);
+    });
 });
 
 

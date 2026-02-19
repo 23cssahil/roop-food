@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, PlusCircle, CheckCircle2, Trash2, LayoutDashboard, UtensilsCrossed, MessageSquare } from 'lucide-react';
+import { Package, PlusCircle, CheckCircle2, Trash2, LayoutDashboard, UtensilsCrossed, MessageSquare, TrendingUp, IndianRupee } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AdminDashboard() {
@@ -9,6 +9,7 @@ export default function AdminDashboard() {
     const [items, setItems] = useState([]);
     const [feedback, setFeedback] = useState([]);
     const [staff, setStaff] = useState([]);
+    const [sales, setSales] = useState([]);
     const [user, setUser] = useState(JSON.parse(localStorage.getItem('adminUser')) || null);
     const [newItem, setNewItem] = useState({ name: '', price: '', image_url: '' });
 
@@ -22,11 +23,21 @@ export default function AdminDashboard() {
         fetchOrders();
         fetchItems();
         fetchFeedback();
-        if (user.is_super) fetchStaff();
+        if (user.is_super) {
+            fetchStaff();
+            fetchSales();
+        }
 
         const interval = setInterval(fetchOrders, 30000);
         return () => clearInterval(interval);
     }, [user]);
+
+    const fetchSales = () => {
+        fetch('/admin/daily-sales')
+            .then(res => res.json())
+            .then(data => setSales(Array.isArray(data) ? data : []))
+            .catch(err => console.error("Sales fetch error:", err));
+    };
 
     const fetchStaff = () => {
         fetch('/admin/staff')
@@ -151,6 +162,14 @@ export default function AdminDashboard() {
                     >
                         Reviews
                     </button>
+                    {user?.is_super === 1 && (
+                        <button
+                            className={`px-6 py-2 rounded-full font-bold transition-all ${activeTab === 'sales' ? 'bg-primary text-white shadow-lg' : 'text-light hover:text-primary'}`}
+                            onClick={() => setActiveTab('sales')}
+                        >
+                            Sales
+                        </button>
+                    )}
                     {user?.is_super === 1 && (
                         <button
                             className={`px-6 py-2 rounded-full font-bold transition-all ${activeTab === 'staff' ? 'bg-primary text-white shadow-lg' : 'text-light hover:text-primary'}`}
@@ -288,6 +307,65 @@ export default function AdminDashboard() {
                             </div>
                         ))}
                         {feedback.length === 0 && <p className="text-center py-20 text-light italic col-span-full">No reviews yet. Feed your guests!</p>}
+                    </motion.div>
+                )}
+                {activeTab === 'sales' && user?.is_super === 1 && (
+                    <motion.div
+                        key="sales"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        className="space-y-6"
+                    >
+                        <div className="flex items-center gap-4 mb-2">
+                            <div className="p-3 bg-primary/10 rounded-2xl text-primary">
+                                <TrendingUp size={24} />
+                            </div>
+                            <div>
+                                <h3 className="text-2xl font-black">Sales Analytics</h3>
+                                <p className="text-sm text-light font-medium uppercase tracking-widest">Performance Insights</p>
+                            </div>
+                        </div>
+
+                        <div className="glass-panel rounded-[32px] overflow-hidden">
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left">
+                                    <thead>
+                                        <tr className="border-b border-slate-100">
+                                            <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-light">Date</th>
+                                            <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-light">Orders</th>
+                                            <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-light text-right">Revenue</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-50">
+                                        {sales.length > 0 ? sales.map((day, idx) => (
+                                            <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                                                <td className="px-8 py-5 font-bold text-slate-900">
+                                                    {new Date(day.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                </td>
+                                                <td className="px-8 py-5 font-bold">
+                                                    <span className="px-3 py-1 bg-slate-100 rounded-full text-xs">
+                                                        {day.orders} {day.orders === 1 ? 'Order' : 'Orders'}
+                                                    </span>
+                                                </td>
+                                                <td className="px-8 py-5 text-right font-black text-primary">
+                                                    <div className="flex items-center justify-end gap-1">
+                                                        <IndianRupee size={16} />
+                                                        {Number(day.revenue).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )) : (
+                                            <tr>
+                                                <td colSpan="3" className="px-8 py-20 text-center text-light italic">
+                                                    No sales data recorded yet. Time to get some orders!
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </motion.div>
                 )}
                 {activeTab === 'staff' && user?.is_super === 1 && (
