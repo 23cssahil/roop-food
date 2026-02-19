@@ -287,12 +287,19 @@ if (require('fs').existsSync(distPath)) {
     console.log("Found static assets directory");
     app.use(express.static(distPath));
     app.use((req, res, next) => {
-        if (req.method === 'GET' && !req.path.startsWith('/api') && !req.path.startsWith('/admin')) {
+        // Serve index.html for any GET request that isn't an /api call
+        if (req.method === 'GET' && !req.path.startsWith('/api')) {
             if (require('fs').existsSync(indexPath)) {
                 return res.sendFile(indexPath);
             }
         }
         next();
+    });
+
+    // Global Error Handler
+    app.use((err, req, res, next) => {
+        console.error("💥 Unhandled Server Error:", err.stack);
+        res.status(500).json({ error: "Internal server error" });
     });
 } else {
     console.warn("Warning: static assets directory NOT found at:", distPath);
