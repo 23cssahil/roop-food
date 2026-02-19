@@ -39,13 +39,24 @@ connection.connect(async (err) => {
             await connection.promise().query(sql);
         }
 
-        // 2. Add Initial Admin (Approved & Super)
+        // 1b. Migration: Add columns if table already existed without them
+        try {
+            await connection.promise().query("ALTER TABLE admins ADD COLUMN is_approved TINYINT DEFAULT 0");
+            console.log("✅ Added is_approved column");
+        } catch (e) { /* Likely column already exists */ }
+
+        try {
+            await connection.promise().query("ALTER TABLE admins ADD COLUMN is_super TINYINT DEFAULT 0");
+            console.log("✅ Added is_super column");
+        } catch (e) { /* Likely column already exists */ }
+
+        // 2. Add Initial Admin (Approved & Super) or Update if exists
         const hashedPassword = await bcrypt.hash("admin123", 10);
         await connection.promise().query(
-            "INSERT IGNORE INTO admins (username, password, is_approved, is_super) VALUES (?, ?, 1, 1)",
+            "INSERT INTO admins (username, password, is_approved, is_super) VALUES (?, ?, 1, 1) ON DUPLICATE KEY UPDATE is_approved = 1, is_super = 1",
             ["admin", hashedPassword]
         );
-        console.log("✅ Initial Admin created: admin / admin123");
+        console.log("✅ Admin 'admin' is now synchronized (Approved & Super).");
 
         // 3. Add Sample Items
         const sampleItems = [
