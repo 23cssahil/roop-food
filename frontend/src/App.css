@@ -280,10 +280,10 @@ button {
     font-size: 1.1rem !important;
     line-height: 1.2;
     white-space: normal !important;
-    word-break: break-word !important;
-    overflow-wrap: anywhere !important;
-    flex: 1 !important;
-    min-width: 0 !important;
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
+    flex: 1 1 auto !important;
+    min-width: 120px !important;
   }
 
   .item-price {
@@ -320,10 +320,10 @@ button {
   font-size: 1.4rem;
   font-weight: 800;
   white-space: normal;
-  word-break: break-word;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  word-break: normal;
   min-width: 0;
-  flex: 1 1 0%;
+  flex: 1 1 auto;
   display: block;
 }
 
@@ -747,6 +747,18 @@ button {
 
 .grid {
   display: grid;
+}
+
+.grid-safe {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .grid-safe {
+    grid-template-columns: 1fr;
+  }
 }
 
 .grid-cols-1 {
