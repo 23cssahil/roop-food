@@ -29,47 +29,53 @@ app.use(session({
 
 let isDbConnected = false;
 
-// ================= MYSQL =================
+// ================= MYSQL (Connection Pool) =================
 const dbConfig = {
     host: process.env.DB_HOST || "mysql.railway.internal",
     user: process.env.DB_USER || "root",
     password: process.env.DB_PASSWORD || "JAjNBoVYqqFqjZEVxHnnEaOwlFTKIsKS",
     database: process.env.DB_NAME || process.env.DB_DATABASE || "railway",
     port: process.env.DB_PORT || 3306,
-    connectTimeout: 10000 // 10 seconds timeout
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 10000,
+    connectTimeout: 30000
 };
 
-let db = mysql.createConnection(dbConfig);
+// Use a pool instead of a single connection — pools auto-reconnect
+const db = mysql.createPool(dbConfig);
 
-function handleDisconnect() {
-    db.connect(err => {
+// Test connection on startup
+db.getConnection((err, connection) => {
+    if (err) {
+        isDbConnected = false;
+        console.error("❌ Database connection failed at startup!");
+        console.error(`Attempted Host: ${dbConfig.host}:${dbConfig.port}`);
+        console.error("Error Details:", err.message);
+        console.error("HINT: Double-check your Render environment variables: DB_HOST, DB_USER, DB_PASSWORD, DB_NAME");
+    } else {
+        isDbConnected = true;
+        console.log("✅ MySQL Pool connected successfully!");
+        connection.release();
+        runMigrations();
+    }
+});
+
+// Keep-alive ping every 5 minutes to prevent Railway idle timeout
+setInterval(() => {
+    db.query('SELECT 1', (err) => {
         if (err) {
+            console.error('❌ Keep-alive ping failed:', err.message);
             isDbConnected = false;
-            console.error("❌ Database connection failed at startup!");
-            console.error(`Attempted Host: ${dbConfig.host}`);
-            console.error(`Attempted Port: ${dbConfig.port}`);
-            console.error("Error Details:", err.message);
-            console.error("HINT: Double-check your Render environment variables: DB_HOST, DB_USER, DB_PASSWORD, DB_NAME");
-            // Don't exit, allow the app to run and show errors via API
         } else {
             isDbConnected = true;
-            console.log("✅ MySQL Connected successfully as ID " + db.threadId);
-            runMigrations();
         }
     });
+}, 5 * 60 * 1000);
 
-    db.on('error', err => {
-        console.error('❌ Database error event:', err.code);
-        isDbConnected = false;
-        if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === 'ECONNRESET') {
-            console.log("Attempting to reconnect...");
-            db = mysql.createConnection(dbConfig);
-            handleDisconnect();
-        } else {
-            console.error("Fatal DB error. Re-initialization might be needed.");
-        }
-    });
-}
+function handleDisconnect() { } // legacy stub — no longer needed with pool
 
 function runMigrations() {
     console.log("🛠️ Running database migrations...");
