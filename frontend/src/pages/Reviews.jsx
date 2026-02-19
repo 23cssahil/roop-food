@@ -40,7 +40,7 @@ export default function Reviews() {
                 </div>
 
                 {loading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 gap-6">
                         {[...Array(6)].map((_, i) => (
                             <div key={i} className="glass-panel p-8 rounded-[32px] h-64 animate-pulse bg-white/50" />
                         ))}
@@ -53,7 +53,7 @@ export default function Reviews() {
                         <Link to="/" className="btn btn-primary">Order Now</Link>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+                    <div className="grid grid-cols-1 gap-6 w-full max-w-2xl mx-auto">
                         {reviews.map((review, idx) => (
                             <motion.div
                                 key={idx}
