@@ -1,4 +1,8 @@
-require('dotenv').config();
+try {
+    require('dotenv').config();
+} catch (e) {
+    console.log("dotenv not found, skipping (likely production environment)");
+}
 const express = require("express");
 const mysql = require("mysql2");
 const bodyParser = require("body-parser");

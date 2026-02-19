@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "build": "npm install && cd frontend && npm install && npm run build"
   },
   "keywords": [],
   "author": "",
@@ -14,10 +15,18 @@
     "bcryptjs": "^2.4.3",
     "body-parser": "^2.2.2",
     "cors": "^2.8.6",
-    "dotenv": "^16.4.7",
+    "dotenv": "^16.6.1",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
     "mysql2": "^3.17.2",
     "pdfkit": "^0.17.2"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/23cssahil/roop-food.git"
+  },
+  "bugs": {
+    "url": "https://github.com/23cssahil/roop-food/issues"
+  },
+  "homepage": "https://github.com/23cssahil/roop-food#readme"
 }
