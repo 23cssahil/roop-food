@@ -285,6 +285,11 @@ app.post("/api/order/:id/feedback", (req, res) => {
     );
 });
 
+// public get feedback
+app.get("/api/feedback", (req, res) => {
+    db.query("SELECT rating, comment, customer_name, created_at FROM feedback WHERE rating >= 4 ORDER BY created_at DESC LIMIT 12", (e, r) => res.json(r || []));
+});
+
 app.get("/admin/feedback", checkAdmin, (req, res) => {
     db.query("SELECT * FROM feedback ORDER BY created_at DESC", (e, r) => res.json(r));
 });

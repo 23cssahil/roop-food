@@ -74,6 +74,21 @@ connection.connect(async (err) => {
         }
         console.log("✅ Sample food items added.");
 
+        // 4. Add Sample Feedback
+        const sampleFeedback = [
+            [1, 5, "The Margherita Pizza was incredible! Best I've had in years.", "Sahil Khan"],
+            [2, 4, "Really loved the chicken burger. Proper gourmet quality.", "Sarah J."],
+            [3, 5, "That lava cake is out of this world. Highly recommended!", "Amit P."]
+        ];
+
+        for (let fb of sampleFeedback) {
+            await connection.promise().query(
+                "INSERT INTO feedback (order_id, rating, comment, customer_name) SELECT ?, ?, ?, ? WHERE NOT EXISTS (SELECT 1 FROM feedback WHERE comment = ?)",
+                [...fb, fb[2]]
+            );
+        }
+        console.log("✅ Sample feedback added.");
+
         console.log("\n🚀 Seeding Complete! Your app should now show items and allow login.");
         process.exit(0);
 
