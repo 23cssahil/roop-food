@@ -12,7 +12,7 @@ const bcrypt = require("bcryptjs");
 const path = require("path");
 
 const app = express();
-const BUILD_ID = "2026-02-19-V20";
+const BUILD_ID = "2026-02-19-V21";
 console.log("=======================================");
 console.log(`🚀 APP STARTING... VERSION: ${BUILD_ID}`);
 console.log("=======================================");
@@ -74,28 +74,41 @@ function handleDisconnect() {
 function runMigrations() {
     console.log("🛠️ Running database migrations...");
 
-    // Add columns if they don't exist (Robust Check)
-    const checkColumns = (column, callback) => {
+    // 1. Create missing tables
+    const tableQueries = [
+        "CREATE TABLE IF NOT EXISTS feedback (id INT AUTO_INCREMENT PRIMARY KEY, order_id INT, rating INT, comment TEXT, customer_name VARCHAR(255), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)",
+        "CREATE TABLE IF NOT EXISTS orders (id INT AUTO_INCREMENT PRIMARY KEY, customer_name VARCHAR(255), phone VARCHAR(20), total DECIMAL(10,2), status VARCHAR(50) DEFAULT 'Pending', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)",
+        "CREATE TABLE IF NOT EXISTS items (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), price DECIMAL(10,2), image_url TEXT, description TEXT)"
+    ];
+
+    tableQueries.forEach(sql => {
+        db.query(sql, (err) => {
+            if (err) console.error("Table Creation Error:", err.message);
+        });
+    });
+
+    // 2. Add individual columns if missing
+    const checkAndAddColumn = (table, column, type, callback) => {
         db.query(
-            "SELECT COUNT(*) as count FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'admins' AND column_name = ?",
-            [column],
+            "SELECT COUNT(*) as count FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = ? AND column_name = ?",
+            [table, column],
             (err, results) => {
                 if (!err && results[0] && results[0].count === 0) {
-                    db.query(`ALTER TABLE admins ADD COLUMN ${column} TINYINT DEFAULT 0`, callback);
+                    db.query(`ALTER TABLE ${table} ADD COLUMN ${column} ${type}`, (alterErr) => {
+                        if (alterErr) console.error(`Failed to add ${column} to ${table}:`, alterErr.message);
+                        else console.log(`✅ Migration complete: Added ${column} to ${table}`);
+                        if (callback) callback();
+                    });
                 } else if (callback) {
-                    callback(err);
+                    callback();
                 }
             }
         );
     };
 
-    checkColumns('is_approved', (err) => {
-        if (err) console.error("Migration Error (is_approved):", err.message);
-    });
-
-    checkColumns('is_super', (err) => {
-        if (err) console.error("Migration Error (is_super):", err.message);
-    });
+    checkAndAddColumn('admins', 'is_approved', 'TINYINT DEFAULT 0');
+    checkAndAddColumn('admins', 'is_super', 'TINYINT DEFAULT 0');
+    checkAndAddColumn('items', 'description', 'TEXT');
 
     // Synchronize Super Admin
     const hashedPassword = bcrypt.hashSync("admin123", 10);
