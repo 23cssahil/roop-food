@@ -44,6 +44,20 @@ db.connect(err => {
 
 // ================= API ROUTES =================
 
+app.get("/api/health-check", (req, res) => {
+    db.query("SELECT 1", (err) => {
+        if (err) {
+            return res.status(500).json({
+                status: "error",
+                message: "Database connection failed",
+                details: err.message,
+                hint: "Check your Render environment variables (DB_HOST, DB_USER, etc.)"
+            });
+        }
+        res.json({ status: "ok", message: "Database connected successfully" });
+    });
+});
+
 app.post("/admin/signup", async (req, res) => {
     if (db.state === 'disconnected') return res.status(503).json({ error: "Database not connected" });
     const { username, password } = req.body;

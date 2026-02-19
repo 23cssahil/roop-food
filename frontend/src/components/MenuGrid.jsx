@@ -23,7 +23,7 @@ export default function MenuGrid() {
             });
     }, []);
 
-    if (loading) return <div className="text-center p-8">Loading delicious menu...</div>;
+    if (loading) return <div id="menu" className="text-center p-8">Loading delicious menu...</div>;
 
     if (error) return (
         <div className="text-center p-8 text-red-500">

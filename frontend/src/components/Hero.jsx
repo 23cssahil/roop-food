@@ -38,7 +38,7 @@ export default function Hero() {
             >
                 <button
                     className="btn btn-primary"
-                    onClick={() => document.getElementById('menu').scrollIntoView({ behavior: 'smooth' })}
+                    onClick={() => document.getElementById('menu')?.scrollIntoView({ behavior: 'smooth' })}
                 >
                     Explore Menu <ArrowRight size={20} />
                 </button>
