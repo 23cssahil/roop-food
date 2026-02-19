@@ -1,14 +1,10 @@
 import { useState, useEffect } from 'react';
 import ItemCard from './ItemCard';
-import { ArrowDown } from 'lucide-react';
-
-const ITEMS_PER_PAGE = 8; // 2 rows of 4 on desktop
 
 export default function MenuGrid() {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [showAll, setShowAll] = useState(false);
 
     useEffect(() => {
         fetch('/api/items')
@@ -46,9 +42,6 @@ export default function MenuGrid() {
         </div>
     );
 
-    const displayedItems = showAll ? items : items.slice(0, ITEMS_PER_PAGE);
-    const hasMore = items.length > ITEMS_PER_PAGE;
-
     return (
         <section id="menu" className="container section-spacing">
             <h2 className="section-title">
@@ -58,25 +51,11 @@ export default function MenuGrid() {
             {items.length === 0 ? (
                 <p className="text-center">No items found.</p>
             ) : (
-                <>
-                    <div className="menu-grid">
-                        {displayedItems.map(item => (
-                            <ItemCard key={item.id} item={item} />
-                        ))}
-                    </div>
-
-                    {hasMore && !showAll && (
-                        <div className="flex justify-center mt-10">
-                            <button
-                                className="btn btn-outline flex items-center gap-2 hover:border-primary hover:text-primary"
-                                onClick={() => setShowAll(true)}
-                            >
-                                <ArrowDown size={18} />
-                                View All {items.length} Items
-                            </button>
-                        </div>
-                    )}
-                </>
+                <div className="menu-grid">
+                    {items.map(item => (
+                        <ItemCard key={item.id} item={item} />
+                    ))}
+                </div>
             )}
         </section>
     );

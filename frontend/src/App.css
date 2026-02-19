@@ -219,26 +219,11 @@ button {
   }
 }
 
-/* Menu Grid — 4-col desktop, 2-col tablet, 1-col mobile */
+/* Menu Grid — always 2 columns, wrapping rows */
 .menu-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
-}
-
-@media (max-width: 1024px) {
-  .menu-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.25rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .menu-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.875rem;
-    padding: 0 0.25rem;
-  }
 }
 
 @media (max-width: 400px) {
