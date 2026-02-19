@@ -73,7 +73,7 @@ export default function Reviews() {
                                     ))}
                                 </div>
 
-                                <p className="text-slate-700 font-medium leading-relaxed italic mb-8 min-h-[60px] whitespace-normal break-words" style={{ overflowWrap: 'anywhere', wordBreak: 'normal' }}>
+                                <p className="text-slate-700 font-medium leading-relaxed italic mb-8 min-h-[60px] whitespace-normal" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                                     "{review.comment}"
                                 </p>
 
