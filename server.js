@@ -49,16 +49,25 @@ db.connect(err => {
 // ================= API ROUTES =================
 
 app.get("/api/health-check", (req, res) => {
+    console.log("Health check hit. isDbConnected:", isDbConnected);
+    if (!isDbConnected) {
+        return res.json({
+            status: "disconnected",
+            message: "Database is not connected. Check Render environment variables.",
+            hint: "Look for '❌ Database connection failed' in your Render logs."
+        });
+    }
+
     db.query("SELECT 1", (err) => {
         if (err) {
+            console.error("Health check query failed:", err.message);
             return res.status(500).json({
                 status: "error",
-                message: "Database connection failed",
-                details: err.message,
-                hint: "Check your Render environment variables (DB_HOST, DB_USER, etc.)"
+                message: "Database connection failed during query",
+                details: err.message
             });
         }
-        res.json({ status: "ok", message: "Database connected successfully" });
+        res.json({ status: "ok", message: "Database is live and responding" });
     });
 });
 
