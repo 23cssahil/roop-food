@@ -46,6 +46,8 @@ function handleDisconnect() {
         if (err) {
             isDbConnected = false;
             console.error("❌ Database connection failed at startup!");
+            console.error(`Attempted Host: ${dbConfig.host}`);
+            console.error(`Attempted Port: ${dbConfig.port}`);
             console.error("Error Details:", err.message);
             console.error("HINT: Double-check your Render environment variables: DB_HOST, DB_USER, DB_PASSWORD, DB_NAME");
             // Don't exit, allow the app to run and show errors via API
