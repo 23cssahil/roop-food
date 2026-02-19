@@ -18,7 +18,7 @@ export default function Hero() {
                 transition={{ duration: 0.6 }}
                 className="hero-title"
             >
-                Delicious Food,<br />
+                Roop-Food,<br />
                 <span className="text-primary">Delivered Magic.</span>
             </motion.h1>
 
