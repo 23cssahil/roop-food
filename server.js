@@ -12,6 +12,10 @@ const bcrypt = require("bcryptjs");
 const path = require("path");
 
 const app = express();
+const BUILD_ID = "2026-02-19-V10";
+console.log("=======================================");
+console.log(`🚀 APP STARTING... VERSION: ${BUILD_ID}`);
+console.log("=======================================");
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -26,25 +30,45 @@ app.use(session({
 let isDbConnected = false;
 
 // ================= MYSQL =================
-const db = mysql.createConnection({
+const dbConfig = {
     host: process.env.DB_HOST || "mysql.railway.internal",
     user: process.env.DB_USER || "root",
     password: process.env.DB_PASSWORD || "JAjNBoVYqqFqjZEVxHnnEaOwlFTKIsKS",
     database: process.env.DB_NAME || process.env.DB_DATABASE || "railway",
-    port: process.env.DB_PORT || 3306
-});
+    port: process.env.DB_PORT || 3306,
+    connectTimeout: 10000 // 10 seconds timeout
+};
 
-db.connect(err => {
-    if (err) {
+let db = mysql.createConnection(dbConfig);
+
+function handleDisconnect() {
+    db.connect(err => {
+        if (err) {
+            isDbConnected = false;
+            console.error("❌ Database connection failed at startup!");
+            console.error("Error Details:", err.message);
+            console.error("HINT: Double-check your Render environment variables: DB_HOST, DB_USER, DB_PASSWORD, DB_NAME");
+            // Don't exit, allow the app to run and show errors via API
+        } else {
+            isDbConnected = true;
+            console.log("✅ MySQL Connected successfully as ID " + db.threadId);
+        }
+    });
+
+    db.on('error', err => {
+        console.error('❌ Database error event:', err.code);
         isDbConnected = false;
-        console.error("❌ Database connection failed!");
-        console.error("Error Details:", err.message);
-        console.error("Double-check your Render environment variables: DB_HOST, DB_USER, DB_PASSWORD, DB_NAME");
-        return;
-    }
-    isDbConnected = true;
-    console.log("MySQL Connected as ID " + db.threadId);
-});
+        if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === 'ECONNRESET') {
+            console.log("Attempting to reconnect...");
+            db = mysql.createConnection(dbConfig);
+            handleDisconnect();
+        } else {
+            console.error("Fatal DB error. Re-initialization might be needed.");
+        }
+    });
+}
+
+handleDisconnect();
 
 // ================= API ROUTES =================
 
