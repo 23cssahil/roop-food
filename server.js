@@ -136,8 +136,15 @@ app.post("/admin/login", (req, res) => {
             const match = await bcrypt.compare(password, admin.password);
 
             if (match) {
-                req.session.admin = true;
-                res.json({ success: true });
+                if (admin.is_approved === 0) {
+                    return res.json({ success: false, message: "Account pending approval" });
+                }
+                req.session.admin = {
+                    id: admin.id,
+                    username: admin.username,
+                    is_super: admin.is_super
+                };
+                res.json({ success: true, user: { username: admin.username, is_super: admin.is_super } });
             } else {
                 res.json({ success: false, message: "Invalid credentials" });
             }
@@ -152,6 +159,11 @@ function checkAdmin(req, res, next) {
     if (req.session.admin) next();
     else res.status(401).json({ error: "Login required" });
 }
+
+app.post("/admin/logout", (req, res) => {
+    req.session.destroy();
+    res.json({ success: true });
+});
 
 
 

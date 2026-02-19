@@ -28,15 +28,20 @@ export default function AdminLogin() {
 
             if (data.success) {
                 if (isSignup) {
-                    setMessage('Account created! Step into your kitchen.');
+                    setMessage('Request sent! Please wait for owner approval.');
                     setIsSignup(false);
                     setUsername('');
                     setPassword('');
                 } else {
+                    localStorage.setItem('adminUser', JSON.stringify(data.user));
                     navigate('/admin/dashboard');
                 }
             } else {
-                setError(data.error || data.message || 'Authentication failed');
+                if (data.message === "Account pending approval") {
+                    setError('Wait for Approval: Your account is currently under review by the administrator.');
+                } else {
+                    setError(data.error || data.message || 'Authentication failed');
+                }
             }
         } catch (err) {
             setError('Connection lost. Please try again.');

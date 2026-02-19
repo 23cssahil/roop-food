@@ -23,7 +23,13 @@ connection.connect(async (err) => {
     try {
         // 1. Create tables first (Insurance)
         const tables = [
-            `CREATE TABLE IF NOT EXISTS admins (id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(255) UNIQUE, password VARCHAR(255))`,
+            `CREATE TABLE IF NOT EXISTS admins (
+                id INT AUTO_INCREMENT PRIMARY KEY, 
+                username VARCHAR(255) UNIQUE, 
+                password VARCHAR(255),
+                is_approved TINYINT DEFAULT 0,
+                is_super TINYINT DEFAULT 0
+            )`,
             `CREATE TABLE IF NOT EXISTS items (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), price DECIMAL(10,2), image_url TEXT, description TEXT)`,
             `CREATE TABLE IF NOT EXISTS orders (id INT AUTO_INCREMENT PRIMARY KEY, customer_name VARCHAR(255), phone VARCHAR(20), total DECIMAL(10,2), status VARCHAR(50) DEFAULT 'Pending', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`,
             `CREATE TABLE IF NOT EXISTS order_items (id INT AUTO_INCREMENT PRIMARY KEY, order_id INT, item_name VARCHAR(255), price DECIMAL(10,2), qty INT, FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE)`
@@ -33,10 +39,10 @@ connection.connect(async (err) => {
             await connection.promise().query(sql);
         }
 
-        // 2. Add Initial Admin
+        // 2. Add Initial Admin (Approved & Super)
         const hashedPassword = await bcrypt.hash("admin123", 10);
         await connection.promise().query(
-            "INSERT IGNORE INTO admins (username, password) VALUES (?, ?)",
+            "INSERT IGNORE INTO admins (username, password, is_approved, is_super) VALUES (?, ?, 1, 1)",
             ["admin", hashedPassword]
         );
         console.log("✅ Initial Admin created: admin / admin123");

@@ -8,16 +8,50 @@ export default function AdminDashboard() {
     const [orders, setOrders] = useState([]);
     const [items, setItems] = useState([]);
     const [feedback, setFeedback] = useState([]);
+    const [staff, setStaff] = useState([]);
+    const [user, setUser] = useState(JSON.parse(localStorage.getItem('adminUser')) || null);
     const [newItem, setNewItem] = useState({ name: '', price: '', image_url: '' });
+
     const navigate = useNavigate();
 
     useEffect(() => {
+        if (!user) {
+            navigate('/admin/login');
+            return;
+        }
         fetchOrders();
         fetchItems();
         fetchFeedback();
+        if (user.is_super) fetchStaff();
+
         const interval = setInterval(fetchOrders, 30000);
         return () => clearInterval(interval);
-    }, []);
+    }, [user]);
+
+    const fetchStaff = () => {
+        fetch('/admin/staff')
+            .then(res => res.json())
+            .then(data => setStaff(Array.isArray(data) ? data : []));
+    };
+
+    const approveStaff = (id) => {
+        fetch(`/admin/approve-staff/${id}`, { method: 'PUT' })
+            .then(() => fetchStaff());
+    };
+
+    const deleteStaff = (id) => {
+        if (!confirm("Are you sure you want to remove this staff member?")) return;
+        fetch(`/admin/delete-staff/${id}`, { method: 'DELETE' })
+            .then(() => fetchStaff());
+    };
+
+    const handleLogout = () => {
+        fetch('/admin/logout', { method: 'POST' })
+            .then(() => {
+                localStorage.removeItem('adminUser');
+                navigate('/admin/login');
+            });
+    };
 
     const fetchOrders = () => {
         fetch('/admin/orders')
@@ -115,7 +149,19 @@ export default function AdminDashboard() {
                     >
                         Reviews
                     </button>
+                    {user?.is_super === 1 && (
+                        <button
+                            className={`px-6 py-2 rounded-full font-bold transition-all ${activeTab === 'staff' ? 'bg-primary text-white shadow-lg' : 'text-light hover:text-primary'}`}
+                            onClick={() => setActiveTab('staff')}
+                        >
+                            Staff
+                        </button>
+                    )}
                 </div>
+
+                <button onClick={handleLogout} className="text-light hover:text-red-500 font-bold flex items-center gap-2">
+                    Logout
+                </button>
             </div>
 
             <AnimatePresence mode="wait">
@@ -240,6 +286,50 @@ export default function AdminDashboard() {
                             </div>
                         ))}
                         {feedback.length === 0 && <p className="text-center py-20 text-light italic col-span-full">No reviews yet. Feed your guests!</p>}
+                    </motion.div>
+                )}
+                {activeTab === 'staff' && user?.is_super === 1 && (
+                    <motion.div
+                        key="staff"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        className="space-y-6"
+                    >
+                        <h3 className="text-2xl font-black mb-6">Team Management</h3>
+                        <div className="grid grid-cols-1 gap-4">
+                            {staff.map(s => (
+                                <div key={s.id} className="glass-panel p-6 rounded-[24px] flex items-center justify-between">
+                                    <div>
+                                        <h4 className="font-black text-lg flex items-center gap-2">
+                                            {s.username}
+                                            {s.is_super === 1 && <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase">Super</span>}
+                                        </h4>
+                                        <p className="text-sm text-light">ID: #{s.id}</p>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        {s.is_approved === 0 ? (
+                                            <button
+                                                onClick={() => approveStaff(s.id)}
+                                                className="btn btn-primary px-6 py-2"
+                                            >
+                                                Approve
+                                            </button>
+                                        ) : (
+                                            <span className="text-green-500 font-bold text-sm">Active Member</span>
+                                        )}
+                                        {s.is_super === 0 && (
+                                            <button
+                                                onClick={() => deleteStaff(s.id)}
+                                                className="p-2 text-slate-300 hover:text-red-500 transition-colors"
+                                            >
+                                                <Trash2 size={20} />
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>
