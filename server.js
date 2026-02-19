@@ -12,7 +12,7 @@ const bcrypt = require("bcryptjs");
 const path = require("path");
 
 const app = express();
-const BUILD_ID = "2026-02-19-V21";
+const BUILD_ID = "2026-02-19-V22";
 console.log("=======================================");
 console.log(`🚀 APP STARTING... VERSION: ${BUILD_ID}`);
 console.log("=======================================");
@@ -257,7 +257,43 @@ app.delete("/admin/delete-item/:id", checkSuperAdmin, (req, res) => {
         () => res.json({ success: true }));
 });
 
-// get daily sales (Super Admin Only)
+// ================= FEEDBACK / REVIEWS =================
+
+// GET all public feedback (for Reviews page)
+app.get("/api/feedback", (req, res) => {
+    if (!isDbConnected) return res.status(503).json([]);
+    db.query(
+        "SELECT * FROM feedback ORDER BY created_at DESC",
+        (err, results) => {
+            if (err) {
+                console.error("Feedback fetch error:", err.message);
+                return res.status(500).json([]);
+            }
+            res.json(results || []);
+        }
+    );
+});
+
+// POST submit feedback for an order
+app.post("/api/order/:orderId/feedback", (req, res) => {
+    const { orderId } = req.params;
+    const { rating, comment, customer_name } = req.body;
+    if (!rating || !customer_name) {
+        return res.status(400).json({ error: "Rating and customer name are required." });
+    }
+    db.query(
+        "INSERT INTO feedback (order_id, rating, comment, customer_name) VALUES (?, ?, ?, ?)",
+        [orderId, rating, comment || '', customer_name],
+        (err, result) => {
+            if (err) {
+                console.error("Feedback insert error:", err.message);
+                return res.status(500).json({ error: "Failed to save feedback." });
+            }
+            res.json({ success: true, id: result.insertId });
+        }
+    );
+});
+
 app.get("/admin/daily-sales", checkSuperAdmin, (req, res) => {
     const sql = `
         SELECT 
