@@ -218,8 +218,9 @@ button {
 
 @media (max-width: 768px) {
   .menu-grid {
-    grid-template-columns: 1fr !important;
-    gap: 1.5rem;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1rem;
+    padding: 0 0.5rem;
   }
 }
 
@@ -246,6 +247,12 @@ button {
   overflow: hidden;
 }
 
+@media (max-width: 768px) {
+  .item-image-wrapper {
+    height: 160px;
+  }
+}
+
 .item-image {
   width: 100%;
   height: 100%;
@@ -262,6 +269,36 @@ button {
   display: flex;
   flex-direction: column;
   flex: 1;
+}
+
+@media (max-width: 768px) {
+  .item-content {
+    padding: 1rem;
+  }
+
+  .item-title {
+    font-size: 1.1rem !important;
+    line-height: 1.2;
+  }
+
+  .item-price {
+    font-size: 1rem !important;
+  }
+
+  .item-desc {
+    font-size: 0.8rem;
+    line-height: 1.3;
+    margin-bottom: 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .item-content .btn {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
 }
 
 .item-header {
