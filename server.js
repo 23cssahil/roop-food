@@ -208,11 +208,24 @@ app.put("/admin/order-done/:id", checkAdmin, (req, res) => {
 
 // ================= PRODUCTION SERVING =================
 
-if (process.env.NODE_ENV === 'production' || true) {
-    app.use(express.static(path.join(__dirname, 'frontend/dist')));
-    app.use((req, res) => {
-        res.sendFile(path.join(__dirname, 'frontend/dist', 'index.html'));
+// ================= PRODUCTION SERVING =================
+const distPath = path.join(__dirname, 'frontend/dist');
+const indexPath = path.join(distPath, 'index.html');
+
+console.log("Checking for static files at:", distPath);
+if (require('fs').existsSync(distPath)) {
+    console.log("Found static assets directory");
+    app.use(express.static(distPath));
+    app.get('*', (req, res) => {
+        if (require('fs').existsSync(indexPath)) {
+            res.sendFile(indexPath);
+        } else {
+            res.status(404).send("Frontend build not found (index.html missing)");
+        }
     });
+} else {
+    console.warn("Warning: static assets directory NOT found at:", distPath);
+    app.get('/', (req, res) => res.send("API Server is running, but frontend is not built."));
 }
 
 
