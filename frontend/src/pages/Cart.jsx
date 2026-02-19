@@ -31,7 +31,7 @@ export default function Cart() {
         <div className="cart-page pt-32 container pb-20">
             <h2 className="text-3xl md:text-4xl font-black mb-8 px-4">Your Cart</h2>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="cart-layout">
                 <div className="lg:col-span-2 space-y-4 px-4 md:px-0">
                     <AnimatePresence>
                         {cart.map(item => (
