@@ -1020,3 +1020,29 @@ button {
     gap: 1.5rem;
   }
 }
+
+/* Cart Responsive Fixes (Final) */
+.cart-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .cart-layout {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .cart-layout>div {
+    width: 100% !important;
+  }
+
+  .cart-layout .lg\:sticky {
+    position: relative !important;
+    top: 0 !important;
+  }
+}
