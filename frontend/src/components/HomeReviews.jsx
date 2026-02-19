@@ -65,7 +65,7 @@ export default function HomeReviews() {
                                 ))}
                             </div>
 
-                            <p className="text-slate-700 font-medium leading-relaxed italic mb-8 flex-1" style={{ overflowWrap: 'break-word' }}>
+                            <p className="text-slate-700 font-medium leading-relaxed italic mb-8 flex-1 whitespace-normal break-words" style={{ overflowWrap: 'break-word' }}>
                                 "{review.comment || 'Amazing experience!'}"
                             </p>
 
