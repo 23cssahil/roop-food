@@ -11,7 +11,7 @@ export default function Navbar() {
             <div className="nav-container">
                 <Link to="/" className="nav-logo">
                     <Utensils size={28} />
-                    QR<span>Food</span>
+                    Roop<span>Food</span>
                 </Link>
 
                 <div className="nav-actions">
