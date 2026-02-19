@@ -12,7 +12,7 @@ const bcrypt = require("bcryptjs");
 const path = require("path");
 
 const app = express();
-const BUILD_ID = "2026-02-19-V10";
+const BUILD_ID = "2026-02-19-V11";
 console.log("=======================================");
 console.log(`🚀 APP STARTING... VERSION: ${BUILD_ID}`);
 console.log("=======================================");
@@ -286,12 +286,13 @@ console.log("Checking for static files at:", distPath);
 if (require('fs').existsSync(distPath)) {
     console.log("Found static assets directory");
     app.use(express.static(distPath));
-    app.get('/:path*', (req, res) => {
-        if (require('fs').existsSync(indexPath)) {
-            res.sendFile(indexPath);
-        } else {
-            res.status(404).send("Frontend build not found (index.html missing)");
+    app.use((req, res, next) => {
+        if (req.method === 'GET' && !req.path.startsWith('/api') && !req.path.startsWith('/admin')) {
+            if (require('fs').existsSync(indexPath)) {
+                return res.sendFile(indexPath);
+            }
         }
+        next();
     });
 } else {
     console.warn("Warning: static assets directory NOT found at:", distPath);
