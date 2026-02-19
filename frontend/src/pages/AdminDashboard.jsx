@@ -195,7 +195,7 @@ export default function AdminDashboard() {
                             </button>
                         </form>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="admin-items-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {items.map(item => (
                                 <div key={item.id} className="glass-panel p-4 rounded-[24px] flex items-center gap-4">
                                     <img
@@ -223,7 +223,7 @@ export default function AdminDashboard() {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 20 }}
-                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                        className="feedback-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                     >
                         {feedback.map(f => (
                             <div key={f.id} className="glass-panel p-6 rounded-[24px]">

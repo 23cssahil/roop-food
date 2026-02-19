@@ -985,8 +985,8 @@ button {
   .admin-dashboard,
   .cart-page,
   .login-container {
-    padding-top: 5rem !important;
-    /* Slightly reduced */
+    padding-top: 8rem !important;
+    /* Increased to clear fixed navbar */
     padding-left: 1rem !important;
     padding-right: 1rem !important;
   }
@@ -1002,6 +1002,7 @@ button {
     flex-direction: column !important;
     align-items: flex-start !important;
     gap: 1.5rem !important;
+    margin-top: 1rem !important;
   }
 
   .admin-tab-container {
@@ -1020,11 +1021,26 @@ button {
   .admin-tab-container button {
     flex-shrink: 0;
     white-space: nowrap;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    font-size: 0.85rem !important;
+  }
+
+  .feedback-grid {
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+  }
+
+  .admin-dashboard .grid {
+    grid-template-columns: 1fr !important;
   }
 
   .glass-panel {
     padding: 1.5rem !important;
     border-radius: 24px !important;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    min-height: min-content;
   }
 
   .login-container .glass-panel {
