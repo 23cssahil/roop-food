@@ -9,12 +9,20 @@ import AdminDashboard from './pages/AdminDashboard';
 import Reviews from './pages/Reviews';
 import './App.css';
 
+const pageVariants = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  exit: { opacity: 0 },
+};
+
 const PageWrapper = ({ children }) => (
   <motion.div
-    initial={{ opacity: 0, x: 20 }}
-    animate={{ opacity: 1, x: 0 }}
-    exit={{ opacity: 0, x: -20 }}
-    transition={{ duration: 0.3 }}
+    variants={pageVariants}
+    initial="initial"
+    animate="animate"
+    exit="exit"
+    transition={{ duration: 0.2 }}
+    style={{ minHeight: '100%' }}
   >
     {children}
   </motion.div>
