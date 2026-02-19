@@ -307,11 +307,17 @@ button {
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 1rem;
+  gap: 1rem;
+  width: 100%;
 }
 
 .item-title {
   font-size: 1.4rem;
   font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .item-price {
@@ -321,6 +327,7 @@ button {
   border-radius: 99px;
   font-weight: 800;
   font-size: 1rem;
+  flex-shrink: 0;
 }
 
 .item-desc {
