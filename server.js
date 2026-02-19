@@ -34,7 +34,9 @@ const db = mysql.createConnection({
 
 db.connect(err => {
     if (err) {
-        console.error("Database connection failed:", err.stack);
+        console.error("❌ Database connection failed!");
+        console.error("Error Details:", err.message);
+        console.error("Double-check your Render environment variables: DB_HOST, DB_USER, DB_PASSWORD, DB_NAME");
         return;
     }
     console.log("MySQL Connected as ID " + db.threadId);
