@@ -8,8 +8,18 @@ export default function MenuGrid() {
 
     useEffect(() => {
         fetch('/api/items')
-            .then(res => {
-                if (!res.ok) throw new Error('Failed to fetch items');
+            .then(async res => {
+                const contentType = res.headers.get('content-type');
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    let errorData;
+                    try { errorData = JSON.parse(errorText); } catch (e) { }
+                    throw new Error(errorData?.error || `Server returned ${res.status}: ${errorText.substring(0, 100)}`);
+                }
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await res.text();
+                    throw new Error(`Expected JSON but got ${contentType}: ${text.substring(0, 100)}`);
+                }
                 return res.json();
             })
             .then(data => {
@@ -18,7 +28,7 @@ export default function MenuGrid() {
             })
             .catch(err => {
                 console.error('Error fetching items:', err);
-                setError('Could not load menu. Please make sure the backend is running.');
+                setError(err.message);
                 setLoading(false);
             });
     }, []);

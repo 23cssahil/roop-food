@@ -80,22 +80,33 @@ app.post("/admin/signup", async (req, res) => {
 });
 
 app.post("/admin/login", (req, res) => {
-    if (db.state === 'disconnected') return res.status(503).json({ error: "Database not connected" });
+    if (db.state === 'disconnected') {
+        console.error("Login attempted but DB is disconnected");
+        return res.status(503).json({ error: "Database not connected. Please check Render Environment Variables." });
+    }
     const { username, password } = req.body;
-    db.query("SELECT * FROM admins WHERE username = ?", [username], async (err, results) => {
-        if (err) return res.status(500).json({ error: "Database error" });
-        if (results.length === 0) return res.json({ success: false, message: "Invalid credentials" });
+    try {
+        db.query("SELECT * FROM admins WHERE username = ?", [username], async (err, results) => {
+            if (err) {
+                console.error("DB Query Error during login:", err);
+                return res.status(500).json({ error: "Database error during login" });
+            }
+            if (!results || results.length === 0) return res.json({ success: false, message: "Invalid credentials" });
 
-        const admin = results[0];
-        const match = await bcrypt.compare(password, admin.password);
+            const admin = results[0];
+            const match = await bcrypt.compare(password, admin.password);
 
-        if (match) {
-            req.session.admin = true;
-            res.json({ success: true });
-        } else {
-            res.json({ success: false, message: "Invalid credentials" });
-        }
-    });
+            if (match) {
+                req.session.admin = true;
+                res.json({ success: true });
+            } else {
+                res.json({ success: false, message: "Invalid credentials" });
+            }
+        });
+    } catch (queryErr) {
+        console.error("Critical Login Error:", queryErr);
+        res.status(500).json({ error: "Internal server error during login request" });
+    }
 });
 
 function checkAdmin(req, res, next) {
