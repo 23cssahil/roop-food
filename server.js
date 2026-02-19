@@ -253,7 +253,7 @@ console.log("Checking for static files at:", distPath);
 if (require('fs').existsSync(distPath)) {
     console.log("Found static assets directory");
     app.use(express.static(distPath));
-    app.get('(.*)', (req, res) => {
+    app.get('/:path*', (req, res) => {
         if (require('fs').existsSync(indexPath)) {
             res.sendFile(indexPath);
         } else {
