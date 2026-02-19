@@ -12,7 +12,7 @@ const bcrypt = require("bcryptjs");
 const path = require("path");
 
 const app = express();
-const BUILD_ID = "2026-02-19-V12";
+const BUILD_ID = "2026-02-19-V14";
 console.log("=======================================");
 console.log(`🚀 APP STARTING... VERSION: ${BUILD_ID}`);
 console.log("=======================================");
@@ -74,13 +74,27 @@ function handleDisconnect() {
 function runMigrations() {
     console.log("🛠️ Running database migrations...");
 
-    // Add columns if they don't exist
-    db.query("ALTER TABLE admins ADD COLUMN is_approved TINYINT DEFAULT 0", (err) => {
-        if (err && err.code !== 'ER_DUP_FIELDNAME') console.error("Migration Error (is_approved):", err.message);
+    // Add columns if they don't exist (Robust Check)
+    const checkColumns = (column, callback) => {
+        db.query(
+            "SELECT COUNT(*) as count FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'admins' AND column_name = ?",
+            [column],
+            (err, results) => {
+                if (!err && results[0] && results[0].count === 0) {
+                    db.query(`ALTER TABLE admins ADD COLUMN ${column} TINYINT DEFAULT 0`, callback);
+                } else if (callback) {
+                    callback(err);
+                }
+            }
+        );
+    };
+
+    checkColumns('is_approved', (err) => {
+        if (err) console.error("Migration Error (is_approved):", err.message);
     });
 
-    db.query("ALTER TABLE admins ADD COLUMN is_super TINYINT DEFAULT 0", (err) => {
-        if (err && err.code !== 'ER_DUP_FIELDNAME') console.error("Migration Error (is_super):", err.message);
+    checkColumns('is_super', (err) => {
+        if (err) console.error("Migration Error (is_super):", err.message);
     });
 
     // Synchronize Super Admin
