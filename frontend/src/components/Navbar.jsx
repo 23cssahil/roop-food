@@ -16,7 +16,7 @@ export default function Navbar() {
 
                 <div className="nav-actions">
                     <Link to="/admin" className="btn btn-outline btn-icon">
-                        <User size={20} />
+                        <User size={50} />
                     </Link>
 
                     <Link to="/cart" className="btn btn-primary cart-btn">
