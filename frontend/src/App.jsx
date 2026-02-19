@@ -6,6 +6,7 @@ import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import Reviews from './pages/Reviews';
 import './App.css';
 
 const PageWrapper = ({ children }) => (
@@ -29,6 +30,7 @@ function App() {
           <Route index element={<PageWrapper><Home /></PageWrapper>} />
           <Route path="cart" element={<PageWrapper><Cart /></PageWrapper>} />
           <Route path="checkout" element={<PageWrapper><Checkout /></PageWrapper>} />
+          <Route path="reviews" element={<PageWrapper><Reviews /></PageWrapper>} />
           <Route path="admin" element={<PageWrapper><AdminLogin /></PageWrapper>} />
           <Route path="admin/dashboard" element={<PageWrapper><AdminDashboard /></PageWrapper>} />
         </Route>
