@@ -53,14 +53,14 @@ export default function Reviews() {
                         <Link to="/" className="btn btn-primary">Order Now</Link>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
                         {reviews.map((review, idx) => (
                             <motion.div
                                 key={idx}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: idx * 0.05 }}
-                                className="glass-panel p-8 rounded-[32px] relative group hover:shadow-xl transition-all duration-300 border border-white"
+                                className="glass-panel p-8 rounded-[32px] relative group hover:shadow-xl transition-all duration-300 border border-white min-w-0 w-full"
                             >
                                 <div className="flex gap-1 mb-4">
                                     {[...Array(5)].map((_, i) => (
@@ -73,7 +73,7 @@ export default function Reviews() {
                                     ))}
                                 </div>
 
-                                <p className="text-slate-700 font-medium leading-relaxed italic mb-8 min-h-[60px]">
+                                <p className="text-slate-700 font-medium leading-relaxed italic mb-8 min-h-[60px] break-words whitespace-normal overflow-hidden">
                                     "{review.comment}"
                                 </p>
 

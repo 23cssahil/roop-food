@@ -137,12 +137,14 @@ export default function AdminDashboard() {
                     >
                         Orders
                     </button>
-                    <button
-                        className={`px-6 py-2 rounded-full font-bold transition-all ${activeTab === 'menu' ? 'bg-primary text-white shadow-lg' : 'text-light hover:text-primary'}`}
-                        onClick={() => setActiveTab('menu')}
-                    >
-                        Menu
-                    </button>
+                    {user.is_super === 1 && (
+                        <button
+                            className={`px-6 py-2 rounded-full font-bold transition-all ${activeTab === 'menu' ? 'bg-primary text-white shadow-lg' : 'text-light hover:text-primary'}`}
+                            onClick={() => setActiveTab('menu')}
+                        >
+                            Menu
+                        </button>
+                    )}
                     <button
                         className={`px-6 py-2 rounded-full font-bold transition-all ${activeTab === 'feedback' ? 'bg-primary text-white shadow-lg' : 'text-light hover:text-primary'}`}
                         onClick={() => setActiveTab('feedback')}

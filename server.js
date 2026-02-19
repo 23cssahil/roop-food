@@ -205,7 +205,7 @@ app.get("/api/items", (req, res) => {
 });
 
 // add item
-app.post("/admin/add-item", checkAdmin, (req, res) => {
+app.post("/admin/add-item", checkSuperAdmin, (req, res) => {
     const { name, price, image_url } = req.body;
     db.query(
         "INSERT INTO items (name,price,image_url) VALUES (?,?,?)",
@@ -215,7 +215,7 @@ app.post("/admin/add-item", checkAdmin, (req, res) => {
 });
 
 // update item
-app.put("/admin/update-item/:id", checkAdmin, (req, res) => {
+app.put("/admin/update-item/:id", checkSuperAdmin, (req, res) => {
     const { name, price, image_url } = req.body;
     db.query(
         "UPDATE items SET name=?,price=?,image_url=? WHERE id=?",
@@ -225,7 +225,7 @@ app.put("/admin/update-item/:id", checkAdmin, (req, res) => {
 });
 
 // delete item
-app.delete("/admin/delete-item/:id", checkAdmin, (req, res) => {
+app.delete("/admin/delete-item/:id", checkSuperAdmin, (req, res) => {
     db.query("DELETE FROM items WHERE id=?", [req.params.id],
         () => res.json({ success: true }));
 });
