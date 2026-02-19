@@ -76,11 +76,11 @@ function runMigrations() {
 
     // Add columns if they don't exist
     db.query("ALTER TABLE admins ADD COLUMN is_approved TINYINT DEFAULT 0", (err) => {
-        if (err && err.code !== 'ER_DUP_COLUMN_NAMES') console.error("Migration Error (is_approved):", err.message);
+        if (err && err.code !== 'ER_DUP_FIELDNAME') console.error("Migration Error (is_approved):", err.message);
     });
 
     db.query("ALTER TABLE admins ADD COLUMN is_super TINYINT DEFAULT 0", (err) => {
-        if (err && err.code !== 'ER_DUP_COLUMN_NAMES') console.error("Migration Error (is_super):", err.message);
+        if (err && err.code !== 'ER_DUP_FIELDNAME') console.error("Migration Error (is_super):", err.message);
     });
 
     // Synchronize Super Admin

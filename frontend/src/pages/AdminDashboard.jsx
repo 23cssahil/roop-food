@@ -49,7 +49,7 @@ export default function AdminDashboard() {
         fetch('/admin/logout', { method: 'POST' })
             .then(() => {
                 localStorage.removeItem('adminUser');
-                navigate('/admin/login');
+                navigate('/');
             });
     };
 
