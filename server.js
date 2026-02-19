@@ -45,6 +45,7 @@ db.connect(err => {
 // ================= API ROUTES =================
 
 app.post("/admin/signup", async (req, res) => {
+    if (db.state === 'disconnected') return res.status(503).json({ error: "Database not connected" });
     const { username, password } = req.body;
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -65,6 +66,7 @@ app.post("/admin/signup", async (req, res) => {
 });
 
 app.post("/admin/login", (req, res) => {
+    if (db.state === 'disconnected') return res.status(503).json({ error: "Database not connected" });
     const { username, password } = req.body;
     db.query("SELECT * FROM admins WHERE username = ?", [username], async (err, results) => {
         if (err) return res.status(500).json({ error: "Database error" });
@@ -94,7 +96,11 @@ function checkAdmin(req, res, next) {
 
 // get items
 app.get("/api/items", (req, res) => {
-    db.query("SELECT * FROM items", (e, r) => res.json(r));
+    if (db.state === 'disconnected') return res.status(503).json({ error: "Database not connected. Please check your Render environment variables." });
+    db.query("SELECT * FROM items", (e, r) => {
+        if (e) return res.status(500).json({ error: "Database query failed" });
+        res.json(r || []);
+    });
 });
 
 // add item
