@@ -86,7 +86,7 @@ export default function Cart() {
                     <div className="glass-panel p-6 md:p-8 rounded-[32px] lg:sticky lg:top-32 shadow-xl">
                         <h3 className="text-xl font-black mb-6">Order Summary</h3>
 
-                        <div className="space-y-4 mb-8">
+                        <div className="space-y-4 mb-6 md:mb-8">
                             <div className="flex justify-between text-light">
                                 <span>Subtotal</span>
                                 <span>₹{total.toFixed(2)}</span>

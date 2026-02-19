@@ -96,7 +96,7 @@ export default function AdminDashboard() {
                     <p className="text-light">Manage your kitchen operations and feedback.</p>
                 </div>
 
-                <div className="flex bg-white p-1 rounded-full shadow-sm border border-slate-200">
+                <div className="flex bg-white p-1 rounded-full shadow-sm border border-slate-200 admin-tab-container">
                     <button
                         className={`px-6 py-2 rounded-full font-bold transition-all ${activeTab === 'orders' ? 'bg-primary text-white shadow-lg' : 'text-light hover:text-primary'}`}
                         onClick={() => setActiveTab('orders')}

@@ -929,6 +929,42 @@ button {
     padding-top: 8rem;
     min-height: auto;
   }
+
+  /* Admin & Cart Mobile Specifics */
+  .admin-dashboard,
+  .cart-page,
+  .login-container {
+    padding-top: 6rem !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  .admin-tab-container {
+    overflow-x: auto;
+    white-space: nowrap;
+    display: flex;
+    padding-bottom: 0.5rem;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+
+  .admin-tab-container::-webkit-scrollbar {
+    display: none;
+  }
+
+  .admin-tab-container button {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .glass-panel {
+    padding: 1.5rem !important;
+    border-radius: 24px !important;
+  }
+
+  .login-container .glass-panel {
+    padding: 2rem 1.5rem !important;
+  }
 }
 
 /* Global Container Polish */
