@@ -54,6 +54,7 @@ function handleDisconnect() {
         } else {
             isDbConnected = true;
             console.log("✅ MySQL Connected successfully as ID " + db.threadId);
+            runMigrations();
         }
     });
 
@@ -68,6 +69,30 @@ function handleDisconnect() {
             console.error("Fatal DB error. Re-initialization might be needed.");
         }
     });
+}
+
+function runMigrations() {
+    console.log("🛠️ Running database migrations...");
+
+    // Add columns if they don't exist
+    db.query("ALTER TABLE admins ADD COLUMN is_approved TINYINT DEFAULT 0", (err) => {
+        if (err && err.code !== 'ER_DUP_COLUMN_NAMES') console.error("Migration Error (is_approved):", err.message);
+    });
+
+    db.query("ALTER TABLE admins ADD COLUMN is_super TINYINT DEFAULT 0", (err) => {
+        if (err && err.code !== 'ER_DUP_COLUMN_NAMES') console.error("Migration Error (is_super):", err.message);
+    });
+
+    // Synchronize Super Admin
+    const hashedPassword = bcrypt.hashSync("admin123", 10);
+    db.query(
+        "INSERT INTO admins (username, password, is_approved, is_super) VALUES (?, ?, 1, 1) ON DUPLICATE KEY UPDATE is_approved = 1, is_super = 1",
+        ["admin", hashedPassword],
+        (err) => {
+            if (err) console.error("❌ Failed to sync super admin:", err.message);
+            else console.log("✅ Super Admin synchronized.");
+        }
+    );
 }
 
 handleDisconnect();
@@ -289,6 +314,37 @@ app.put("/admin/order-done/:id", checkAdmin, (req, res) => {
         () => res.json({ success: true })
     );
 });
+
+// ================= STAFF MANAGEMENT (SUPER ADMIN ONLY) =================
+
+function checkSuperAdmin(req, res, next) {
+    if (req.session.admin && req.session.admin.is_super) next();
+    else res.status(403).json({ error: "Access denied. Super Admin only." });
+}
+
+app.get("/admin/staff", checkSuperAdmin, (req, res) => {
+    db.query("SELECT id, username, is_approved, is_super FROM admins ORDER BY id ASC", (e, r) => {
+        if (e) return res.status(500).json({ error: "Failed to fetch staff" });
+        res.json(r || []);
+    });
+});
+
+app.put("/admin/approve-staff/:id", checkSuperAdmin, (req, res) => {
+    db.query("UPDATE admins SET is_approved = 1 WHERE id = ?", [req.params.id], (err) => {
+        if (err) return res.status(500).json({ error: "Approval failed" });
+        res.json({ success: true });
+    });
+});
+
+app.delete("/admin/delete-staff/:id", checkSuperAdmin, (req, res) => {
+    // Prevent deleting self
+    if (req.session.admin.id == req.params.id) return res.status(400).json({ error: "Cannot delete yourself" });
+    db.query("DELETE FROM admins WHERE id = ?", [req.params.id], (err) => {
+        if (err) return res.status(500).json({ error: "Deletion failed" });
+        res.json({ success: true });
+    });
+});
+
 
 // ================= PRODUCTION SERVING =================
 
