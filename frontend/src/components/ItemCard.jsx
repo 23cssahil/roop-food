@@ -2,26 +2,33 @@ import { motion } from 'framer-motion';
 import { Plus, Star } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
-export default function ItemCard({ item }) {
+export default function ItemCard({ item, index = 0 }) {
     const { addToCart } = useCart();
 
     return (
         <motion.div
             className="item-card"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: index * 0.05 }}
         >
             <div className="item-image-wrapper">
                 <img
                     src={item.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c'}
                     alt={item.name}
                     className="item-image"
+                    loading="lazy"
                     onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c' }}
                 />
-                <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-2 py-1 rounded-full flex items-center gap-1 text-xs font-bold shadow-sm">
-                    <Star size={12} fill="#FFD700" color="#FFD700" /> 4.8
+                <div style={{
+                    position: 'absolute', top: '0.75rem', right: '0.75rem',
+                    background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(4px)',
+                    WebkitBackdropFilter: 'blur(4px)',
+                    padding: '0.15rem 0.5rem', borderRadius: '99px',
+                    display: 'flex', alignItems: 'center', gap: '0.2rem',
+                    fontSize: '0.75rem', fontWeight: '700', boxShadow: '0 1px 4px rgba(0,0,0,0.08)'
+                }}>
+                    <Star size={11} fill="#FFD700" color="#FFD700" /> 4.8
                 </div>
             </div>
 

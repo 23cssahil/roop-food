@@ -52,8 +52,8 @@ export default function MenuGrid() {
                 <p className="text-center">No items found.</p>
             ) : (
                 <div className="menu-grid">
-                    {items.map(item => (
-                        <ItemCard key={item.id} item={item} />
+                    {items.map((item, idx) => (
+                        <ItemCard key={item.id} item={item} index={idx} />
                     ))}
                 </div>
             )}
