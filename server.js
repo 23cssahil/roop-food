@@ -23,6 +23,8 @@ app.use(session({
 }));
 
 
+let isDbConnected = false;
+
 // ================= MYSQL =================
 const db = mysql.createConnection({
     host: process.env.DB_HOST || "mysql.railway.internal",
@@ -34,11 +36,13 @@ const db = mysql.createConnection({
 
 db.connect(err => {
     if (err) {
+        isDbConnected = false;
         console.error("❌ Database connection failed!");
         console.error("Error Details:", err.message);
         console.error("Double-check your Render environment variables: DB_HOST, DB_USER, DB_PASSWORD, DB_NAME");
         return;
     }
+    isDbConnected = true;
     console.log("MySQL Connected as ID " + db.threadId);
 });
 
@@ -59,7 +63,7 @@ app.get("/api/health-check", (req, res) => {
 });
 
 app.post("/admin/signup", async (req, res) => {
-    if (db.state === 'disconnected') return res.status(503).json({ error: "Database not connected" });
+    if (!isDbConnected) return res.status(503).json({ error: "Database not connected" });
     const { username, password } = req.body;
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -80,7 +84,7 @@ app.post("/admin/signup", async (req, res) => {
 });
 
 app.post("/admin/login", (req, res) => {
-    if (db.state === 'disconnected') {
+    if (!isDbConnected) {
         console.error("Login attempted but DB is disconnected");
         return res.status(503).json({ error: "Database not connected. Please check Render Environment Variables." });
     }
@@ -121,7 +125,7 @@ function checkAdmin(req, res, next) {
 
 // get items
 app.get("/api/items", (req, res) => {
-    if (db.state === 'disconnected') return res.status(503).json({ error: "Database not connected. Please check your Render environment variables." });
+    if (!isDbConnected) return res.status(503).json({ error: "Database not connected. Check Render environment variables." });
     db.query("SELECT * FROM items", (e, r) => {
         if (e) return res.status(500).json({ error: "Database query failed" });
         res.json(r || []);
