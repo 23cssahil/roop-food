@@ -21,10 +21,10 @@ app.use(session({
 
 // ================= MYSQL =================
 const db = mysql.createConnection({
-    host: process.env.DB_HOST || "localhost",
+    host: process.env.DB_HOST || "mysql.railway.internal",
     user: process.env.DB_USER || "root",
-    password: process.env.DB_PASSWORD || "S@hilkh@nmysql83183",
-    database: process.env.DB_NAME || process.env.DB_DATABASE || "qr_food",
+    password: process.env.DB_PASSWORD || "JAjNBoVYqqFqjZEVxHnnEaOwlFTKIsKS",
+    database: process.env.DB_NAME || process.env.DB_DATABASE || "railway",
     port: process.env.DB_PORT || 3306
 });
 
