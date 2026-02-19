@@ -50,7 +50,7 @@ export default function Cart() {
                                     onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c' }}
                                 />
 
-                                <div className="flex-1 min-w-[150px]">
+                                <div className="flex-1 min-w-[200px]">
                                     <h3 className="text-lg font-black">{item.name}</h3>
                                     <p className="text-primary font-bold">₹{Number(item.price).toFixed(2)}</p>
                                 </div>

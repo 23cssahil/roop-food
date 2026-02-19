@@ -1075,7 +1075,6 @@ button {
   .glass-panel {
     padding: 1.5rem !important;
     border-radius: 24px !important;
-    word-break: break-word;
     overflow-wrap: break-word;
     min-height: min-content;
   }
