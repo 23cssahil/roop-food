@@ -18,8 +18,11 @@
     "dotenv": "^16.6.1",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
-    "mysql2": "^3.17.2",
-    "pdfkit": "^0.17.2"
+    "mysql2": "^3.17.3",
+    "pdfkit": "^0.17.2",
+    "razorpay": "^2.9.6",
+    "socket.io": "^4.8.3",
+    "web-push": "^3.6.7"
   },
   "repository": {
     "type": "git",

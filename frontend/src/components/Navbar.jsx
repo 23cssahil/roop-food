@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ShoppingBag, User, Utensils } from 'lucide-react';
+import { ShoppingBag, User, Utensils, Package, Bike } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { motion } from 'framer-motion';
 
@@ -15,8 +15,16 @@ export default function Navbar() {
                 </Link>
 
                 <div className="nav-actions">
-                    <Link to="/admin" className="btn btn-outline btn-icon">
-                        <User size={50} />
+                    <Link to="/my-orders" className="btn btn-outline btn-icon" title="My Orders">
+                        <Package size={20} />
+                    </Link>
+
+                    <Link to="/delivery/login" className="btn btn-outline btn-icon" title="Delivery Login">
+                        <Bike size={20} />
+                    </Link>
+
+                    <Link to="/admin" className="btn btn-outline btn-icon" title="Admin">
+                        <User size={20} />
                     </Link>
 
                     <Link to="/cart" className="btn btn-primary cart-btn">
@@ -37,4 +45,3 @@ export default function Navbar() {
         </nav>
     );
 }
-

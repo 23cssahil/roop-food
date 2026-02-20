@@ -7,6 +7,11 @@ import Checkout from './pages/Checkout';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import Reviews from './pages/Reviews';
+import MyOrders from './pages/MyOrders';
+import OrderConfirmed from './pages/OrderConfirmed';
+import DeliveryLogin from './pages/DeliveryLogin';
+import DeliveryRegister from './pages/DeliveryRegister';
+import DeliveryDashboard from './pages/DeliveryDashboard';
 import './App.css';
 
 const pageVariants = {
@@ -41,6 +46,11 @@ function App() {
           <Route path="reviews" element={<PageWrapper><Reviews /></PageWrapper>} />
           <Route path="admin" element={<PageWrapper><AdminLogin /></PageWrapper>} />
           <Route path="admin/dashboard" element={<PageWrapper><AdminDashboard /></PageWrapper>} />
+          <Route path="my-orders" element={<PageWrapper><MyOrders /></PageWrapper>} />
+          <Route path="order-confirmed" element={<PageWrapper><OrderConfirmed /></PageWrapper>} />
+          <Route path="delivery/login" element={<PageWrapper><DeliveryLogin /></PageWrapper>} />
+          <Route path="delivery/register" element={<PageWrapper><DeliveryRegister /></PageWrapper>} />
+          <Route path="delivery/dashboard" element={<PageWrapper><DeliveryDashboard /></PageWrapper>} />
         </Route>
       </Routes>
     </AnimatePresence>
