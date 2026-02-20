@@ -42,6 +42,10 @@ body {
   min-height: 100dvh;
   line-height: 1.6;
   overflow-x: hidden;
+  overflow-y: auto;
+  /* Ensure vertical scroll is allowed */
+  -webkit-overflow-scrolling: touch;
+  /* Smooth scroll on iOS */
 }
 
 /* Prevent blank screen: ensure root always has background */
@@ -51,6 +55,8 @@ body {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  overflow: visible;
+  /* Prevent scroll lock */
 }
 
 a {

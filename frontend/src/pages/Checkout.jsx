@@ -71,6 +71,10 @@ export default function Checkout() {
             setPayLoading(false);
             return;
         }
+        if (!import.meta.env.VITE_RAZORPAY_KEY) {
+            console.error("VITE_RAZORPAY_KEY is missing in environment variables!");
+        }
+
         fetch('/api/create-payment', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -146,8 +150,10 @@ export default function Checkout() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(orderData)
             });
+
             const data = await res.json();
-            if (data.success) {
+
+            if (res.ok && data.success) {
                 // Save phone to localStorage for My Orders
                 localStorage.setItem('roop-customer-phone', formData.phone);
                 clearCart();
@@ -160,9 +166,8 @@ export default function Checkout() {
                 window.open(`https://wa.me/919120322488?text=${message}`, '_blank');
                 navigate('/order-confirmed', { state: { orderId: data.orderId, pin: data.pin, orderType, customerName: formData.customer_name } });
             } else {
-                const errorData = await res.json();
-                console.error("Backend Order Error:", errorData);
-                throw new Error(errorData.error || 'Order failed');
+                console.error("Backend Order Error:", data);
+                throw new Error(data.error || 'Order failed');
             }
         } catch (err) {
             console.error("Frontend Order Exception:", err);
