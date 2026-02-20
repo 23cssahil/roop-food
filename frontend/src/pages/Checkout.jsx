@@ -71,8 +71,12 @@ export default function Checkout() {
             setPayLoading(false);
             return;
         }
-        if (!import.meta.env.VITE_RAZORPAY_KEY) {
-            console.error("VITE_RAZORPAY_KEY is missing in environment variables!");
+        const rzpKey = import.meta.env.VITE_RAZORPAY_KEY;
+        if (!rzpKey || rzpKey === 'your_razorpay_key_id') {
+            console.error("⛔ VITE_RAZORPAY_KEY is missing or invalid!");
+            setError('Payment system is not configured. Please contact support (Missing API Key).');
+            setPayLoading(false);
+            return;
         }
 
         fetch('/api/create-payment', {
@@ -84,13 +88,14 @@ export default function Checkout() {
             .then(data => {
                 if (!data.success) throw new Error(data.error || 'Payment init failed');
                 const options = {
-                    key: import.meta.env.VITE_RAZORPAY_KEY || 'rzp_test_placeholder', // Default for test
+                    key: rzpKey,
                     amount: data.amount,
                     currency: 'INR',
                     name: 'Roop Food',
                     description: 'Order Payment',
                     order_id: data.orderId,
                     handler: (response) => {
+                        console.log("💳 Payment Response received:", response);
                         fetch('/api/verify-payment', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -99,43 +104,59 @@ export default function Checkout() {
                             .then(r => r.json())
                             .then(v => {
                                 if (v.success) {
+                                    console.log("✅ Payment Verified Successfully");
                                     setPaymentDone(true);
                                     setPaymentId(v.payment_id);
                                     setPayLoading(false);
                                     setError(null);
                                     document.body.style.overflow = 'auto'; // Restore scroll
                                 } else {
+                                    console.error("❌ Payment Verification Failed:", v.error);
                                     setError('Payment verification failed. Please try again.');
                                     setPayLoading(false);
                                 }
+                            })
+                            .catch(err => {
+                                console.error("❌ Verify Payment Exception:", err);
+                                setError("Verification failed. Please check your internet or retry.");
+                                setPayLoading(false);
                             });
                     },
                     prefill: { name: formData.customer_name, contact: formData.phone },
                     theme: { color: '#FF6B2B' },
                     modal: {
                         ondismiss: () => {
+                            console.log("📢 Razorpay modal dismissed by user");
                             setPayLoading(false);
                             document.body.style.overflow = 'auto'; // Restore scroll on close
                         }
                     }
                 };
+
                 if (typeof window.Razorpay !== 'function') {
-                    throw new Error('Razorpay failed to initialize. Please refresh the page or disable AdBlock.');
+                    console.error("⛔ window.Razorpay is not a function despite script load check.");
+                    throw new Error('Razorpay initialization error. Please refresh.');
                 }
-                console.log("🚀 Initializing Razorpay modal:", { amount: data.amount, orderId: data.orderId });
+
+                console.log("🚀 Launching Razorpay Modal with Options:", {
+                    order_id: options.order_id,
+                    amount: options.amount / 100,
+                    key_prefix: options.key.substring(0, 8) + '...'
+                });
+
                 const rzp = new window.Razorpay(options);
                 rzp.on('payment.failed', (resp) => {
-                    console.error("❌ Razorpay Payment Failed:", resp.error);
-                    setError(`Payment failed: ${resp.error.description}`);
+                    console.error("❌ Razorpay Payment Flow Failed:", resp.error);
+                    setError(`Payment failed: ${resp.error.description || 'Reason unknown'}`);
                     document.body.style.overflow = 'auto';
                 });
                 rzp.open();
             })
             .catch(err => {
-                console.error("❌ Razorpay Catch Error:", err);
-                setError(err.message);
+                console.error("❌ Razorpay Initialization/API Error:", err);
+                setError(err.message || "Failed to start payment. Please try again later.");
                 setPayLoading(false);
-                document.body.style.overflow = 'auto'; // Force restore scroll on failure
+                document.body.style.overflow = 'auto';
             });
     };
 

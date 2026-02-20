@@ -356,17 +356,35 @@ app.delete("/admin/delete-item/:id", checkSuperAdmin, (req, res) => {
 // ================= PAYMENT (RAZORPAY) =================
 app.post("/api/create-payment", async (req, res) => {
     const { amount } = req.body; // in paise (rupees * 100)
-    if (!amount || amount <= 0) return res.status(400).json({ error: "Invalid amount" });
+    console.log("💰 Payment Request Received:", { amount, body: req.body });
+
+    if (!amount || amount <= 0) {
+        console.warn("⚠️ Invalid amount received for payment:", amount);
+        return res.status(400).json({ error: "Invalid amount" });
+    }
+
     try {
-        const order = await razorpay.orders.create({
+        if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+            throw new Error("Razorpay credentials missing in environment variables.");
+        }
+
+        const options = {
             amount: Math.round(amount * 100),
             currency: "INR",
             receipt: `order_${Date.now()}`
-        });
+        };
+        console.log("🛠️ Creating Razorpay Order with options:", options);
+
+        const order = await razorpay.orders.create(options);
+        console.log("✅ Razorpay Order Created:", order.id);
         res.json({ success: true, orderId: order.id, amount: order.amount });
     } catch (e) {
-        console.error("Razorpay Error:", e.message);
-        res.status(500).json({ error: "Payment creation failed. Check Razorpay keys." });
+        console.error("❌ Razorpay Error:", e.message);
+        res.status(500).json({
+            success: false,
+            error: "Payment creation failed. " + e.message,
+            hint: "Ensure RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET are set on Render/Railway."
+        });
     }
 });
 
