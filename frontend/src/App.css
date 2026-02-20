@@ -151,7 +151,19 @@ button {
     gap: 0.25rem;
   }
 
-  .btn-icon {
+  /* Fix Cart overflow on extreme mobile */
+  .cart-btn span:not(.cart-badge) {
+    display: none;
+  }
+
+  .cart-btn {
+    width: 40px;
+    height: 40px;
+    padding: 0.5rem !important;
+  }
+
+  .btn-icon,
+  .cart-btn {
     width: 40px;
     height: 40px;
     padding: 0.5rem;
