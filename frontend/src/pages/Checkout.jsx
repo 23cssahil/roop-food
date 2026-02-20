@@ -71,10 +71,10 @@ export default function Checkout() {
             setPayLoading(false);
             return;
         }
-        const rzpKey = import.meta.env.VITE_RAZORPAY_KEY;
+        const rzpKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
         if (!rzpKey || rzpKey.includes('your_razorpay') || rzpKey === 'rzp_test_placeholder') {
-            console.error("⛔ VITE_RAZORPAY_KEY is missing or invalid!");
-            setError('Payment system is not configured. Please add the VITE_RAZORPAY_KEY environment variable in Render Settings.');
+            console.error("⛔ VITE_RAZORPAY_KEY_ID is missing or invalid!");
+            setError('Payment system is not configured. Please add the VITE_RAZORPAY_KEY_ID environment variable in Render Settings.');
             setPayLoading(false);
             return;
         }
