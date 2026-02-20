@@ -50,6 +50,7 @@ export default function DeliveryDashboard() {
         socket.on('order_assigned', ({ orderId }) => {
             fetchMyOrders();
             fetchAvailableOrders();
+            setActiveTab('my'); // Automatically switch to My Orders
             showNotification(`🛵 Order #${orderId} has been assigned to you!`);
         });
     };
@@ -135,6 +136,17 @@ export default function DeliveryDashboard() {
         } catch {
             setPinMessages(prev => ({ ...prev, [orderId]: { type: 'error', text: 'Server error.' } }));
         }
+    };
+
+    const startDelivery = (orderId) => {
+        fetch(`/admin/order-out-for-delivery/${orderId}`, { method: 'PUT' })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    fetchMyOrders();
+                    showNotification('🚀 Delivery started! Drive safe.');
+                }
+            });
     };
 
     const handleLogout = () => {
@@ -257,25 +269,32 @@ export default function DeliveryDashboard() {
                                             )}
                                         </div>
 
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                                            {order.lat && order.lng && (
-                                                <button onClick={() => navigate('/order-tracking', { state: { order } })}
-                                                    className="btn btn-primary text-sm flex items-center justify-center gap-2">
-                                                    <Navigation size={16} /> Track & Navigate
+                                        <div className="grid grid-cols-1 gap-3 mb-4">
+                                            {order.status === 'Assigned' && (
+                                                <button onClick={() => startDelivery(order.id)}
+                                                    className="btn btn-primary w-full py-4 flex items-center justify-center gap-2">
+                                                    <Bike size={20} /> Start Delivery
                                                 </button>
                                             )}
-                                            {order.lat && order.lng && (
-                                                <a href={`https://www.google.com/maps/search/?api=1&query=${order.lat},${order.lng}`}
-                                                    target="_blank" rel="noopener noreferrer"
-                                                    className="btn btn-outline text-sm flex items-center justify-center gap-2">
-                                                    <MapPin size={16} /> Maps Link
-                                                </a>
+
+                                            {order.status === 'Out for Delivery' && (
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                    <button onClick={() => navigate('/order-tracking', { state: { order } })}
+                                                        className="btn btn-primary text-sm flex items-center justify-center gap-2">
+                                                        <Navigation size={16} /> Track & Navigate
+                                                    </button>
+                                                    <a href={`https://www.google.com/maps/search/?api=1&query=${order.lat},${order.lng}`}
+                                                        target="_blank" rel="noopener noreferrer"
+                                                        className="btn btn-outline text-sm flex items-center justify-center gap-2">
+                                                        <MapPin size={16} /> Maps Link
+                                                    </a>
+                                                </div>
                                             )}
                                         </div>
 
                                         {/* PIN Verification */}
-                                        {order.status !== 'Delivered' && (
-                                            <div className="space-y-3">
+                                        {(order.status === 'Assigned' || order.status === 'Out for Delivery') && (
+                                            <div className="space-y-3 pt-4 border-t border-slate-100">
                                                 <p className="text-xs font-black uppercase tracking-widest text-light">Verify Delivery PIN</p>
                                                 <div className="flex gap-3">
                                                     <input type="text" maxLength={4} className="input text-center text-2xl font-black tracking-widest"

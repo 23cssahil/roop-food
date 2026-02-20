@@ -43,8 +43,8 @@ export default function AdminDashboard() {
     const initSocket = () => {
         socket = io(window.location.origin, { withCredentials: true });
         socket.on('connect', () => socket.emit('register_admin', user?.is_super));
-        socket.on('new_order', () => fetchOrders());
-        socket.on('order_status_update', () => fetchOrders());
+        socket.on('new_order', () => { fetchOrders(); fetchSales(); });
+        socket.on('order_status_update', () => { fetchOrders(); fetchSales(); });
         socket.on('fraud_alert', (data) => {
             setFraudBanner(data.message);
             fetchFraudAlerts();
@@ -456,6 +456,54 @@ export default function AdminDashboard() {
                                 </div>
                             </div>
                         ))}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* EDIT ITEM MODAL */}
+            <AnimatePresence>
+                {editItem && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            className="glass-panel w-full max-w-lg p-8 rounded-[40px] shadow-2xl relative"
+                        >
+                            <button onClick={() => setEditItem(null)} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-primary"><X size={24} /></button>
+                            <h3 className="text-3xl font-black mb-6">Edit <span className="text-primary">Menu Item</span></h3>
+
+                            <div className="space-y-4">
+                                <div className="form-group">
+                                    <label className="form-label">Item Name</label>
+                                    <input type="text" className="input" value={editItem.name}
+                                        onChange={e => setEditItem({ ...editItem, name: e.target.value })} />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Price (₹)</label>
+                                    <input type="number" className="input" value={editItem.price}
+                                        onChange={e => setEditItem({ ...editItem, price: e.target.value })} />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Image URL</label>
+                                    <input type="text" className="input" value={editItem.image_url}
+                                        onChange={e => setEditItem({ ...editItem, image_url: e.target.value })} />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Description</label>
+                                    <textarea className="input min-h-[100px]" value={editItem.description}
+                                        onChange={e => setEditItem({ ...editItem, description: e.target.value })}></textarea>
+                                </div>
+                                <div className="flex gap-3 pt-4">
+                                    <button onClick={saveEditItem} className="btn btn-primary flex-1 py-4">Save Changes</button>
+                                    <button onClick={() => setEditItem(null)} className="btn btn-outline flex-1 py-4">Cancel</button>
+                                </div>
+                            </div>
+                        </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>

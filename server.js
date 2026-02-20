@@ -569,8 +569,9 @@ app.put("/admin/assign-order/:id", checkSuperAdmin, (req, res) => {
 
             // Notify everyone
             io.to("admins").emit("order_status_update", { orderId: parseInt(orderId), status: "Assigned" });
+            io.to("super_admins").emit("order_status_update", { orderId: parseInt(orderId), status: "Assigned" });
             io.to(`boy_${delivery_boy_id}`).emit("order_assigned", { orderId: parseInt(orderId) });
-            io.to("delivery_boys").emit("order_taken", { orderId: parseInt(orderId), takenBy: delivery_boy_id });
+            io.to("delivery_boys").emit("order_taken", { orderId: parseInt(orderId), takenBy: parseInt(delivery_boy_id) });
 
             // Push notification
             db.query("SELECT subscription FROM push_subscriptions WHERE delivery_boy_id=?", [delivery_boy_id], (err, rows) => {
@@ -580,7 +581,7 @@ app.put("/admin/assign-order/:id", checkSuperAdmin, (req, res) => {
                         webpush.sendNotification(sub, JSON.stringify({
                             title: "🛵 New Order Assigned!",
                             body: `Admin assigned Order #${orderId} to you.`,
-                            data: { orderId }
+                            data: { orderId: parseInt(orderId) }
                         })).catch(() => { });
                     } catch (e) { }
                 }
@@ -620,7 +621,9 @@ app.post("/admin/verify-pin", checkSuperAdmin, (req, res) => {
                         [order_id, delivery_boy_id || null, delivery_boy_name || "Unknown Admin"],
                         () => {
                             io.to("super_admins").emit("fraud_alert", {
-                                order_id, delivery_boy_id, delivery_boy_name,
+                                order_id: parseInt(order_id),
+                                delivery_boy_id: delivery_boy_id ? parseInt(delivery_boy_id) : null,
+                                delivery_boy_name: delivery_boy_name || "Unknown",
                                 message: `🚨 FRAUD ALERT: 3 wrong PINs for Order #${order_id}`
                             });
                         }
@@ -755,7 +758,7 @@ app.post("/delivery/verify-pin", checkDeliveryBoy, (req, res) => {
         if (err || !results.length) return res.status(404).json({ error: "Order not found" });
         const order = results[0];
 
-        if (order.delivery_boy_id !== boyId) return res.status(403).json({ error: "This order is not assigned to you." });
+        if (Number(order.delivery_boy_id) !== Number(boyId)) return res.status(403).json({ error: "This order is not assigned to you." });
         if (order.status === "Delivered") return res.json({ success: false, message: "Already delivered." });
         if (order.pin_attempts >= 3) return res.json({ success: false, message: "Order locked. Fraud alert sent.", locked: true });
 
