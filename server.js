@@ -46,7 +46,7 @@ if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
 }
 
 const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_placeholder",
+    key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_SGmu65zsHeXxtI",
     key_secret: process.env.RAZORPAY_KEY_SECRET || "placeholder_secret"
 });
 
