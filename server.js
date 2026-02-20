@@ -814,20 +814,18 @@ function sendPushToAllDeliveryBoys(payload) {
 // ================= PRODUCTION SERVING =================
 const distPath = path.join(__dirname, "frontend/dist");
 const indexPath = path.join(distPath, "index.html");
-const fs = require("fs");
 
-console.log("Checking for static files at:", distPath);
 if (fs.existsSync(distPath)) {
-    console.log("Found static assets directory");
     app.use(express.static(distPath));
-    app.use((req, res, next) => {
-        if (req.method === "GET" && !req.path.startsWith("/api") && !req.path.startsWith("/admin") && !req.path.startsWith("/delivery")) {
-            if (fs.existsSync(indexPath)) return res.sendFile(indexPath);
+    // Serve index.html for all non-API routes (SPA support)
+    app.get("*", (req, res) => {
+        if (!req.path.startsWith("/api")) {
+            res.sendFile(indexPath);
+        } else {
+            res.status(404).json({ error: "API route not found" });
         }
-        next();
     });
 } else {
-    console.warn("Warning: static assets NOT found at:", distPath);
     app.get("/", (req, res) => res.send("API Server running. Frontend not built."));
 }
 

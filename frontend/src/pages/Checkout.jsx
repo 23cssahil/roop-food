@@ -49,6 +49,11 @@ export default function Checkout() {
             setError('Please share your live location first.');
             return;
         }
+        if (!window.Razorpay) {
+            setError('Payment system (Razorpay) is not ready. Please refresh the page.');
+            return;
+        }
+
         setPayLoading(true);
         fetch('/api/create-payment', {
             method: 'POST',
@@ -59,14 +64,13 @@ export default function Checkout() {
             .then(data => {
                 if (!data.success) throw new Error(data.error || 'Payment init failed');
                 const options = {
-                    key: import.meta.env.VITE_RAZORPAY_KEY || 'rzp_test_placeholder',
+                    key: import.meta.env.VITE_RAZORPAY_KEY || 'rzp_test_placeholder', // Default for test
                     amount: data.amount,
                     currency: 'INR',
-                    name: 'Roops Food',
+                    name: 'Roop Food',
                     description: 'Order Payment',
                     order_id: data.orderId,
                     handler: (response) => {
-                        // Verify the payment
                         fetch('/api/verify-payment', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -78,6 +82,7 @@ export default function Checkout() {
                                     setPaymentDone(true);
                                     setPaymentId(v.payment_id);
                                     setPayLoading(false);
+                                    setError(null);
                                 } else {
                                     setError('Payment verification failed. Please try again.');
                                     setPayLoading(false);
