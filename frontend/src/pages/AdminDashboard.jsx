@@ -290,13 +290,13 @@ export default function AdminDashboard() {
                                 <p className="text-xs font-black uppercase tracking-widest text-light mb-1">Total Revenue</p>
                                 <h4 className="text-3xl font-black text-primary flex items-center gap-1">
                                     <IndianRupee size={24} />
-                                    {sales.reduce((acc, curr) => acc + Number(curr.revenue), 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                    {(sales || []).reduce((acc, curr) => acc + Number(curr.revenue || 0), 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                 </h4>
                             </div>
                             <div className="glass-panel p-6 rounded-[24px] bg-gradient-to-br from-secondary/5 to-transparent border-secondary/10">
                                 <p className="text-xs font-black uppercase tracking-widest text-light mb-1">Lifetime Orders</p>
                                 <h4 className="text-3xl font-black text-secondary">
-                                    {sales.reduce((acc, curr) => acc + Number(curr.orders), 0)}
+                                    {(sales || []).reduce((acc, curr) => acc + Number(curr.orders || 0), 0)}
                                 </h4>
                             </div>
                         </div>
@@ -306,22 +306,30 @@ export default function AdminDashboard() {
                                 <table className="w-full text-left">
                                     <thead className="bg-slate-50/50">
                                         <tr className="border-b border-slate-100">
-                                            <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-light">Date</th>
-                                            <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-light">Orders</th>
-                                            <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-light text-right">Revenue</th>
+                                            <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-light whitespace-nowrap">Date</th>
+                                            <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-light whitespace-nowrap text-center">Orders</th>
+                                            <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-light whitespace-nowrap text-right">Revenue</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-50">
-                                        {sales.map((d, i) => (
+                                        {(sales || []).map((d, i) => (
                                             <tr key={i} className="hover:bg-slate-50/80 transition-colors">
-                                                <td className="px-8 py-5 font-bold">{new Date(d.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
-                                                <td className="px-8 py-5"><span className="px-3 py-1 bg-slate-100/50 text-slate-600 rounded-full text-xs font-bold">{d.orders} Orders</span></td>
-                                                <td className="px-8 py-5 text-right font-black text-primary">
-                                                    <span className="flex items-center justify-end gap-0.5">₹{Number(d.revenue).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                                                <td className="px-8 py-5 font-bold whitespace-nowrap">
+                                                    {new Date(d.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                </td>
+                                                <td className="px-8 py-5 text-center whitespace-nowrap">
+                                                    <span className="px-3 py-1 bg-slate-100/50 text-slate-600 rounded-full text-xs font-black">{d.orders}</span>
+                                                </td>
+                                                <td className="px-8 py-5 text-right font-black text-primary whitespace-nowrap">
+                                                    ₹{Number(d.revenue || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                                 </td>
                                             </tr>
                                         ))}
-                                        {sales.length === 0 && <tr><td colSpan="3" className="px-8 py-20 text-center text-light italic">No sales data yet.</td></tr>}
+                                        {(!sales || sales.length === 0) && (
+                                            <tr>
+                                                <td colSpan="3" className="px-8 py-20 text-center text-light italic">No sales data recorded yet.</td>
+                                            </tr>
+                                        )}
                                     </tbody>
                                 </table>
                             </div>
