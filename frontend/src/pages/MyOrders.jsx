@@ -106,9 +106,9 @@ export default function MyOrders() {
                                 {activeOrder.verification_pin && activeOrder.order_type === 'delivery' && (
                                     <div className="delivery-pin-card !mb-0 flex-shrink-0">
                                         <p className="text-xs font-black uppercase tracking-widest text-primary mb-2">🔐 Delivery PIN</p>
-                                        <div className="pin-display !gap-2">
+                                        <div className="pin-display">
                                             {String(activeOrder.verification_pin).split('').map((d, i) => (
-                                                <span key={i} className="pin-digit !text-2xl !w-12 !h-12">{d}</span>
+                                                <span key={i} className="pin-digit">{d}</span>
                                             ))}
                                         </div>
                                         <p className="text-xs text-slate-600 mt-3 max-w-[200px] text-center">

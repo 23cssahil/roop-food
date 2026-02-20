@@ -528,7 +528,7 @@ app.get("/api/my-orders/:phone", (req, res) => {
 });
 
 // ================= ORDER STATUS (SUPER ADMIN ONLY) =================
-app.get("/admin/orders", checkSuperAdmin, (req, res) => {
+app.get("/admin/orders", checkAdmin, (req, res) => {
     const sql = `
         SELECT o.*, oi.item_name, oi.qty,
                db.full_name as delivery_boy_name

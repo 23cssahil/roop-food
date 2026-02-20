@@ -8,7 +8,7 @@ let socket = null;
 
 export default function AdminDashboard() {
     const [user, setUser] = useState(JSON.parse(localStorage.getItem('adminUser')) || null);
-    const [activeTab, setActiveTab] = useState(user?.is_super === 1 ? 'orders' : 'feedback');
+    const [activeTab, setActiveTab] = useState('orders');
     const [orders, setOrders] = useState([]);
     const [items, setItems] = useState([]);
     const [feedback, setFeedback] = useState([]);
@@ -25,8 +25,8 @@ export default function AdminDashboard() {
 
     useEffect(() => {
         if (!user) { navigate('/admin'); return; }
+        fetchOrders(); // Enabled for all staff
         if (user.is_super === 1) {
-            fetchOrders();
             fetchStaff();
             fetchSales();
             fetchDeliveryBoys();
@@ -118,7 +118,7 @@ export default function AdminDashboard() {
     };
 
     const tabs = [
-        { id: 'orders', label: 'Orders', show: user?.is_super === 1 },
+        { id: 'orders', label: 'Orders', show: true },
         { id: 'menu', label: 'Menu', show: user?.is_super === 1 },
         { id: 'feedback', label: 'Reviews', show: true },
         { id: 'sales', label: 'Sales', show: user?.is_super === 1 },
@@ -186,10 +186,10 @@ export default function AdminDashboard() {
                                 <div className="flex flex-wrap gap-3 items-center">
                                     <p className="text-lg font-black">₹{Number(order.total).toFixed(2)}</p>
                                     <div className="flex gap-2 flex-wrap ml-auto">
-                                        {order.status === 'Pending' && order.order_type === 'delivery' && (
+                                        {user.is_super === 1 && order.status === 'Pending' && order.order_type === 'delivery' && (
                                             <button className="btn btn-primary px-4 py-2 text-sm" onClick={() => markOutForDelivery(order.id)}>🛵 Out for Delivery</button>
                                         )}
-                                        {order.status !== 'Completed' && order.status !== 'Delivered' && order.order_type === 'dine_in' && (
+                                        {user.is_super === 1 && order.status !== 'Completed' && order.status !== 'Delivered' && order.order_type === 'dine_in' && (
                                             <button className="btn btn-primary px-4 py-2 text-sm" onClick={() => markOrderDone(order.id)}>✅ Mark Done</button>
                                         )}
                                         {order.lat && order.lng && (
@@ -199,7 +199,7 @@ export default function AdminDashboard() {
                                 </div>
 
                                 {/* Admin PIN Verify for Dine-in */}
-                                {order.order_type === 'dine_in' && order.status !== 'Completed' && order.status !== 'Delivered' && order.verification_pin && (
+                                {order.order_type === 'dine_in' && order.status !== 'Completed' && order.status !== 'Delivered' && order.verification_pin && user.is_super === 1 && (
                                     <div className="mt-4 pt-4 border-t border-slate-100 space-y-3">
                                         <p className="text-xs font-black uppercase tracking-widest text-light">Verify Order PIN</p>
                                         <div className="flex gap-3">

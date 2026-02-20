@@ -1914,13 +1914,35 @@ button {
   }
 
   .pin-digit {
-    width: 52px;
-    height: 52px;
-    font-size: 1.75rem;
+    width: 42px;
+    height: 42px;
+    font-size: 1.5rem;
+  }
+
+  .pin-display {
+    gap: 0.5rem !important;
+    flex-wrap: wrap;
+    justify-content: center;
   }
 
   .delivery-pin-card {
-    padding: 1.25rem;
+    padding: 1rem;
+    width: 100%;
+  }
+
+  /* Sales Table Tweaks */
+  .px-8 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .py-5 {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .admin-dashboard h2 {
+    font-size: 1.875rem;
   }
 }
 
