@@ -390,15 +390,19 @@ app.post("/api/order", (req, res) => {
     const type = order_type || "dine_in";
     const payStatus = payment_status || (type === "dine_in" ? "cash" : "unpaid");
 
+    console.log(`📦 Placing ${type} order for ${customer_name} (Total: ₹${total})`);
+
     db.query(
         "INSERT INTO orders (customer_name, phone, total, order_type, verification_pin, lat, lng, landmark, payment_status, payment_id) VALUES (?,?,?,?,?,?,?,?,?,?)",
         [customer_name, phone, total, type, pin, lat || null, lng || null, landmark || null, payStatus, payment_id || null],
         (err, result) => {
             if (err) {
-                console.error("Order insert failed:", err);
-                return res.status(500).json({ error: "Order failed" });
+                console.error("❌ Order insert failed:", err.message);
+                console.error("Payload:", { customer_name, phone, total, type, pin, lat, lng, landmark, payStatus, payment_id });
+                return res.status(500).json({ error: "Order failed: " + err.message });
             }
             const orderId = result.insertId;
+            console.log(`✅ Order #${orderId} created.`);
             let processed = 0;
 
             if (items.length === 0) {
@@ -820,7 +824,7 @@ const indexPath = path.join(distPath, "index.html");
 if (fs.existsSync(distPath)) {
     app.use(express.static(distPath));
     // Serve index.html for all non-API routes (SPA support)
-    app.get("(.*)", (req, res) => {
+    app.get("/*", (req, res) => {
         if (!req.path.startsWith("/api")) {
             res.sendFile(indexPath);
         } else {

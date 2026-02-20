@@ -109,6 +109,9 @@ export default function Checkout() {
                     theme: { color: '#FF6B2B' },
                     modal: { ondismiss: () => setPayLoading(false) }
                 };
+                if (typeof window.Razorpay !== 'function') {
+                    throw new Error('Razorpay failed to initialize. Please refresh the page or disable AdBlock.');
+                }
                 const rzp = new window.Razorpay(options);
                 rzp.open();
             })
@@ -157,10 +160,13 @@ export default function Checkout() {
                 window.open(`https://wa.me/919120322488?text=${message}`, '_blank');
                 navigate('/order-confirmed', { state: { orderId: data.orderId, pin: data.pin, orderType, customerName: formData.customer_name } });
             } else {
-                throw new Error('Order failed');
+                const errorData = await res.json();
+                console.error("Backend Order Error:", errorData);
+                throw new Error(errorData.error || 'Order failed');
             }
         } catch (err) {
-            setError('Could not place order. Please try again.');
+            console.error("Frontend Order Exception:", err);
+            setError(err.message || 'Could not place order. Please try again.');
         } finally {
             setLoading(false);
         }
