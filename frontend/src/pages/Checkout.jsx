@@ -40,7 +40,21 @@ export default function Checkout() {
         );
     };
 
-    const handleRazorpay = () => {
+    const loadRazorpay = () => {
+        return new Promise((resolve) => {
+            if (window.Razorpay) {
+                resolve(true);
+                return;
+            }
+            const script = document.createElement('script');
+            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+            script.onload = () => resolve(true);
+            script.onerror = () => resolve(false);
+            document.body.appendChild(script);
+        });
+    };
+
+    const handleRazorpay = async () => {
         if (!formData.customer_name || !formData.phone) {
             setError('Please fill your name and phone number first.');
             return;
@@ -49,12 +63,14 @@ export default function Checkout() {
             setError('Please share your live location first.');
             return;
         }
-        if (!window.Razorpay) {
-            setError('Payment system (Razorpay) is not ready. Please refresh the page.');
-            return;
-        }
 
         setPayLoading(true);
+        const isLoaded = await loadRazorpay();
+        if (!isLoaded) {
+            setError('Could not load payment gateway. Please check your internet connection.');
+            setPayLoading(false);
+            return;
+        }
         fetch('/api/create-payment', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

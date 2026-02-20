@@ -16,6 +16,7 @@ const path = require("path");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const webpush = require("web-push");
+const fs = require("fs");
 
 const app = express();
 const server = http.createServer(app);
@@ -33,7 +34,8 @@ app.use(bodyParser.json());
 app.use(session({
     secret: process.env.SESSION_SECRET || "adminsecret",
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: true,
+    cookie: { secure: process.env.NODE_ENV === "production" }
 }));
 
 // ================= RAZORPAY =================
