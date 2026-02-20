@@ -110,6 +110,7 @@ export default function Checkout() {
                                     setPayLoading(false);
                                     setError(null);
                                     document.body.style.overflow = 'auto'; // Restore scroll
+                                    placeOrder(v.payment_id); // AUTO PLACE ORDER
                                 } else {
                                     console.error("❌ Payment Verification Failed:", v.error);
                                     setError('Payment verification failed. Please try again.');
@@ -160,12 +161,7 @@ export default function Checkout() {
             });
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (orderType === 'delivery' && !paymentDone) {
-            setError('Please complete payment first.');
-            return;
-        }
+    const placeOrder = async (finalPaymentId = null) => {
         setLoading(true);
         setError(null);
         try {
@@ -178,7 +174,7 @@ export default function Checkout() {
                 lng: location?.lng || null,
                 landmark: landmark || null,
                 payment_status: orderType === 'delivery' ? 'paid' : 'cash',
-                payment_id: paymentId || null
+                payment_id: finalPaymentId || paymentId || null
             };
             const res = await fetch('/api/order', {
                 method: 'POST',
@@ -210,20 +206,27 @@ export default function Checkout() {
 ${itemsList}
 
 *Total:* ₹${total.toFixed(2)}
-*Payment:* ${orderType === 'delivery' ? `Paid (${paymentId})` : 'Cash'}`;
+*Payment:* ${orderType === 'delivery' ? `Paid (${finalPaymentId || paymentId})` : 'Cash'}`;
 
                 window.open(`https://wa.me/919120322488?text=${encodeURIComponent(message)}`, '_blank');
                 navigate('/order-confirmed', { state: { orderId: data.orderId, pin: data.pin || null, orderType, customerName: formData.customer_name } });
             } else {
-                console.error("Backend Order Error:", data);
                 throw new Error(data.error || 'Order failed');
             }
         } catch (err) {
-            console.error("Frontend Order Exception:", err);
             setError(err.message || 'Could not place order. Please try again.');
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleSubmit = (e) => {
+        if (e) e.preventDefault();
+        if (orderType === 'delivery' && !paymentDone) {
+            setError('Please complete payment first.');
+            return;
+        }
+        placeOrder();
     };
 
     if (cart.length === 0) {
@@ -347,14 +350,9 @@ ${itemsList}
                                         {payLoading ? 'Opening Payment...' : '💳 Pay ₹' + total.toFixed(2) + ' & Order'}
                                     </button>
                                 ) : (
-                                    <>
-                                        <div className="p-3 bg-green-50 text-green-700 font-bold rounded-2xl text-sm text-center">
-                                            ✅ Payment Successful! Now place your order.
-                                        </div>
-                                        <button type="submit" disabled={loading} className="btn btn-primary w-full py-5 text-lg shadow-xl">
-                                            {loading ? 'Placing Order...' : '🛵 Place Delivery Order'}
-                                        </button>
-                                    </>
+                                    <div className="p-5 bg-green-50 text-green-700 font-black rounded-2xl text-center shadow-inner animate-pulse">
+                                        🚀 Payment Verified! Processing & Notifying...
+                                    </div>
                                 )}
                             </div>
                         ) : (

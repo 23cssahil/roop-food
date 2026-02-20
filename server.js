@@ -237,6 +237,7 @@ io.on("connection", (socket) => {
         connectedDeliveryBoys[deliveryBoyId] = socket.id;
         db.query("UPDATE delivery_boys SET socket_id=? WHERE id=?", [socket.id, deliveryBoyId]);
         socket.join("delivery_boys");
+        socket.join(`boy_${deliveryBoyId}`); // Targeted room for assignments
         console.log(`📦 Delivery Boy ${deliveryBoyId} registered with socket ${socket.id}`);
     });
 
@@ -554,6 +555,40 @@ app.put("/admin/order-out-for-delivery/:id", checkSuperAdmin, (req, res) => {
         io.to("delivery_boys").emit("order_status_update", { orderId: parseInt(req.params.id), status: "Out for Delivery" });
         res.json({ success: true });
     });
+});
+
+app.put("/admin/assign-order/:id", checkSuperAdmin, (req, res) => {
+    const { delivery_boy_id } = req.body;
+    const orderId = req.params.id;
+
+    db.query(
+        "UPDATE orders SET delivery_boy_id=?, status='Assigned' WHERE id=?",
+        [delivery_boy_id, orderId],
+        (err) => {
+            if (err) return res.status(500).json({ error: "Assignment failed" });
+
+            // Notify everyone
+            io.to("admins").emit("order_status_update", { orderId: parseInt(orderId), status: "Assigned" });
+            io.to(`boy_${delivery_boy_id}`).emit("order_assigned", { orderId: parseInt(orderId) });
+            io.to("delivery_boys").emit("order_taken", { orderId: parseInt(orderId), takenBy: delivery_boy_id });
+
+            // Push notification
+            db.query("SELECT subscription FROM push_subscriptions WHERE delivery_boy_id=?", [delivery_boy_id], (err, rows) => {
+                if (!err && rows && rows.length > 0) {
+                    try {
+                        const sub = typeof rows[0].subscription === "string" ? JSON.parse(rows[0].subscription) : rows[0].subscription;
+                        webpush.sendNotification(sub, JSON.stringify({
+                            title: "🛵 New Order Assigned!",
+                            body: `Admin assigned Order #${orderId} to you.`,
+                            data: { orderId }
+                        })).catch(() => { });
+                    } catch (e) { }
+                }
+            });
+
+            res.json({ success: true });
+        }
+    );
 });
 
 // ================= PIN VERIFICATION =================

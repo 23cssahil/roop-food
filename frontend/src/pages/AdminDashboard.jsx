@@ -21,6 +21,8 @@ export default function AdminDashboard() {
     const [pinInputs, setPinInputs] = useState({});
     const [pinMessages, setPinMessages] = useState({});
     const [fraudBanner, setFraudBanner] = useState(null);
+    const [assigningOrder, setAssigningOrder] = useState(null); // ID of order being assigned
+    const [selectedBoy, setSelectedBoy] = useState("");
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -97,6 +99,21 @@ export default function AdminDashboard() {
 
     const markOrderDone = (id) => fetch(`/admin/order-done/${id}`, { method: 'PUT' }).then(r => r.json()).then(() => fetchOrders());
     const markOutForDelivery = (id) => fetch(`/admin/order-out-for-delivery/${id}`, { method: 'PUT' }).then(r => r.json()).then(() => fetchOrders());
+
+    const manualAssignOrder = (orderId) => {
+        if (!selectedBoy) return;
+        fetch(`/admin/assign-order/${orderId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ delivery_boy_id: selectedBoy })
+        }).then(r => r.json()).then(d => {
+            if (d.success) {
+                setAssigningOrder(null);
+                setSelectedBoy("");
+                fetchOrders();
+            }
+        });
+    };
 
     const verifyAdminPin = async (orderId) => {
         const pin = pinInputs[orderId];
@@ -192,11 +209,33 @@ export default function AdminDashboard() {
                                         {user.is_super === 1 && order.status !== 'Completed' && order.status !== 'Delivered' && order.order_type === 'dine_in' && (
                                             <button className="btn btn-primary px-4 py-2 text-sm" onClick={() => markOrderDone(order.id)}>✅ Mark Done</button>
                                         )}
+                                        {user.is_super === 1 && order.status === 'Pending' && order.order_type === 'delivery' && !order.delivery_boy_id && (
+                                            <button className="btn btn-outline text-blue-600 border-blue-200 px-4 py-2 text-sm flex items-center gap-2"
+                                                onClick={() => setAssigningOrder(assigningOrder === order.id ? null : order.id)}>
+                                                <Bike size={16} /> Assign Staff
+                                            </button>
+                                        )}
                                         {order.lat && order.lng && (
                                             <a href={`https://www.google.com/maps/search/?api=1&query=${order.lat},${order.lng}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline px-4 py-2 text-sm">📍 Map</a>
                                         )}
                                     </div>
                                 </div>
+
+                                {/* Manual Assignment UI */}
+                                {assigningOrder === order.id && user.is_super === 1 && (
+                                    <div className="mt-4 p-4 bg-blue-50 rounded-2xl border border-blue-100 animate-in slide-in-from-top-2 duration-300">
+                                        <p className="text-xs font-black uppercase text-blue-600 mb-3">Select Delivery staff</p>
+                                        <div className="flex gap-2">
+                                            <select className="input flex-1 !py-2" value={selectedBoy} onChange={e => setSelectedBoy(e.target.value)}>
+                                                <option value="">Choose staff...</option>
+                                                {deliveryBoys.filter(b => b.status === 'approved').map(b => (
+                                                    <option key={b.id} value={b.id}>{b.full_name} (@{b.username})</option>
+                                                ))}
+                                            </select>
+                                            <button onClick={() => manualAssignOrder(order.id)} disabled={!selectedBoy} className="btn btn-primary !py-2 px-6">Assign</button>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Admin PIN Verify for Dine-in */}
                                 {order.order_type === 'dine_in' && order.status !== 'Completed' && order.status !== 'Delivered' && order.verification_pin && user.is_super === 1 && (

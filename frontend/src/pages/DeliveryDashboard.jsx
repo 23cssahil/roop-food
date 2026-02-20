@@ -47,6 +47,11 @@ export default function DeliveryDashboard() {
         socket.on('order_status_update', ({ orderId, status }) => {
             setMyOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
         });
+        socket.on('order_assigned', ({ orderId }) => {
+            fetchMyOrders();
+            fetchAvailableOrders();
+            showNotification(`🛵 Order #${orderId} has been assigned to you!`);
+        });
     };
 
     const registerPush = async () => {
