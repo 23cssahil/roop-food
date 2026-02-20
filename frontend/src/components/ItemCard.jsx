@@ -45,10 +45,12 @@ export default function ItemCard({ item, index = 0 }) {
                 </p>
 
                 <button
-                    className="btn btn-primary w-full mt-auto"
+                    className="btn btn-primary w-full mt-auto py-2 px-1 text-[10px] sm:text-sm flex items-center justify-center gap-1"
                     onClick={() => addToCart(item)}
                 >
-                    <Plus size={18} /> Add to Cart
+                    <Plus size={14} />
+                    <span className="hidden sm:inline">Add to Cart</span>
+                    <span className="sm:hidden">Add</span>
                 </button>
             </div>
         </motion.div>
