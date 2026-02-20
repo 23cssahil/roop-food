@@ -747,6 +747,23 @@ app.post("/delivery/take-order/:id", checkDeliveryBoy, (req, res) => {
             );
         }
     );
+}); app.get("/delivery/analytics", checkDeliveryBoy, (req, res) => {
+    const boyId = req.session.deliveryBoy.id;
+    const sql = `
+        SELECT 
+            DATE_FORMAT(o.created_at, '%Y-%m-%d') as date,
+            COUNT(*) as total_orders,
+            SUM(CASE WHEN o.status = 'Delivered' THEN 1 ELSE 0 END) as completed_orders
+        FROM orders o
+        WHERE o.delivery_boy_id = ?
+        GROUP BY DATE_FORMAT(o.created_at, '%Y-%m-%d')
+        ORDER BY date DESC
+        LIMIT 30
+    `;
+    db.query(sql, [boyId], (err, results) => {
+        if (err) return res.status(500).json({ error: "DB error" });
+        res.json(results || []);
+    });
 });
 
 app.post("/delivery/verify-pin", checkDeliveryBoy, (req, res) => {
@@ -830,6 +847,25 @@ app.get("/admin/fraud-alerts", checkSuperAdmin, (req, res) => {
 
 app.put("/admin/fraud-alerts/:id/resolve", checkSuperAdmin, (req, res) => {
     db.query("UPDATE fraud_alerts SET resolved=1 WHERE id=?", [req.params.id], () => res.json({ success: true }));
+});
+
+app.get("/admin/delivery-boy-analytics", checkSuperAdmin, (req, res) => {
+    const sql = `
+        SELECT 
+            db.full_name,
+            db.id as boy_id,
+            DATE_FORMAT(o.created_at, '%Y-%m-%d') as date,
+            COUNT(*) as orders_count,
+            SUM(CASE WHEN o.status = 'Delivered' THEN 1 ELSE 0 END) as completed_count
+        FROM orders o
+        JOIN delivery_boys db ON o.delivery_boy_id = db.id
+        GROUP BY db.id, DATE_FORMAT(o.created_at, '%Y-%m-%d')
+        ORDER BY date DESC, orders_count DESC
+    `;
+    db.query(sql, (err, results) => {
+        if (err) return res.status(500).json({ error: "DB error" });
+        res.json(results || []);
+    });
 });
 
 // ================= STAFF MANAGEMENT =================

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Package, CheckCircle2, Truck, LogOut, Navigation, AlertTriangle, ShoppingBag, ShieldAlert } from 'lucide-react';
+import { MapPin, Package, CheckCircle2, Truck, LogOut, Navigation, AlertTriangle, ShoppingBag, ShieldAlert, BarChart3, Bike, IndianRupee, Clock, Calendar } from 'lucide-react';
 
 let socket = null;
 
@@ -19,11 +19,13 @@ export default function DeliveryDashboard() {
     const [notification, setNotification] = useState(null);
     const [activeTab, setActiveTab] = useState('pool');
     const [takingOrder, setTakingOrder] = useState(null);
+    const [analytics, setAnalytics] = useState([]);
 
     useEffect(() => {
         if (!boy) { navigate('/delivery/login'); return; }
         fetchAvailableOrders();
         fetchMyOrders();
+        fetchAnalytics();
         initSocket();
         registerPush();
         return () => { if (socket) socket.disconnect(); };
@@ -95,6 +97,13 @@ export default function DeliveryDashboard() {
                 return r.json();
             })
             .then(data => setMyOrders(Array.isArray(data) ? data : []))
+            .catch(() => { });
+    };
+
+    const fetchAnalytics = () => {
+        fetch('/delivery/analytics')
+            .then(r => r.json())
+            .then(data => setAnalytics(Array.isArray(data) ? data : []))
             .catch(() => { });
     };
 
@@ -174,7 +183,10 @@ export default function DeliveryDashboard() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
                 <div>
                     <h2 className="text-4xl font-black tracking-tight mb-1">Delivery <span className="text-primary">Dashboard</span></h2>
-                    <p className="text-light">Welcome, <span className="font-bold text-slate-700">{boy.full_name}</span></p>
+                    <div className="flex items-center gap-3">
+                        <p className="text-light">Welcome, <span className="font-bold text-slate-700">{boy.full_name}</span></p>
+                        <span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider">ID: #{boy.id}</span>
+                    </div>
                 </div>
                 <div className="flex items-center gap-4">
                     {/* Tab Switcher */}
@@ -186,6 +198,10 @@ export default function DeliveryDashboard() {
                         <button onClick={() => setActiveTab('my')}
                             className={`px-5 py-2 rounded-full font-bold text-sm transition-all ${activeTab === 'my' ? 'bg-primary text-white shadow' : 'text-light hover:text-primary'}`}>
                             My Orders
+                        </button>
+                        <button onClick={() => setActiveTab('analytics')}
+                            className={`px-5 py-2 rounded-full font-bold text-sm transition-all ${activeTab === 'analytics' ? 'bg-primary text-white shadow' : 'text-light hover:text-primary'}`}>
+                            Analytics
                         </button>
                     </div>
                     <button onClick={handleLogout} className="text-light hover:text-red-500 font-bold flex items-center gap-2 text-sm">
@@ -329,6 +345,59 @@ export default function DeliveryDashboard() {
                         )}
                     </motion.div>
                 </AnimatePresence>
+            )}
+            {activeTab === 'analytics' && (
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="glass-panel p-6 rounded-[24px] bg-gradient-to-br from-primary/10 to-transparent">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-light mb-1">Total Orders</p>
+                            <h4 className="text-3xl font-black text-primary">{analytics.reduce((acc, curr) => acc + curr.total_orders, 0)}</h4>
+                        </div>
+                        <div className="glass-panel p-6 rounded-[24px] bg-gradient-to-br from-green-500/10 to-transparent">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-light mb-1">Delivered</p>
+                            <h4 className="text-3xl font-black text-green-600">{analytics.reduce((acc, curr) => acc + (Number(curr.completed_orders) || 0), 0)}</h4>
+                        </div>
+                        <div className="glass-panel p-6 rounded-[24px] bg-gradient-to-br from-amber-500/10 to-transparent">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-light mb-1">Completion</p>
+                            <h4 className="text-3xl font-black text-amber-600">
+                                {analytics.length > 0 && analytics.reduce((acc, curr) => acc + curr.total_orders, 0) > 0 ? Math.round((analytics.reduce((acc, curr) => acc + (Number(curr.completed_orders) || 0), 0) / analytics.reduce((acc, curr) => acc + curr.total_orders, 0)) * 100) : 0}%
+                            </h4>
+                        </div>
+                    </div>
+                    <div className="glass-panel rounded-[32px] overflow-hidden">
+                        <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between">
+                            <h3 className="text-xl font-black">Daily Performance</h3>
+                            <Calendar size={20} className="text-slate-300" />
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left">
+                                <thead className="bg-slate-50/50">
+                                    <tr className="border-b border-slate-100">
+                                        <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-light">Date</th>
+                                        <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-light text-center">Tasks</th>
+                                        <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-light text-center">Done</th>
+                                        <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-light text-right">Rate</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {analytics.map((day, idx) => (
+                                        <tr key={idx} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                                            <td className="px-8 py-5 font-bold text-slate-700">{new Date(day.date).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })}</td>
+                                            <td className="px-8 py-5 text-center font-black">{day.total_orders}</td>
+                                            <td className="px-8 py-5 text-center font-black text-green-600">{day.completed_orders}</td>
+                                            <td className="px-8 py-5 text-right">
+                                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${Number(day.completed_orders) === Number(day.total_orders) ? 'bg-green-100 text-green-600' : 'bg-amber-100 text-amber-600'}`}>
+                                                    {Number(day.total_orders) > 0 ? Math.round((Number(day.completed_orders) / Number(day.total_orders)) * 100) : 0}%
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {analytics.length === 0 && <tr><td colSpan="4" className="px-8 py-20 text-center text-light italic">No analytics yet.</td></tr>}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </motion.div>
             )}
         </div>
     );

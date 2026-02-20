@@ -23,6 +23,7 @@ export default function AdminDashboard() {
     const [fraudBanner, setFraudBanner] = useState(null);
     const [assigningOrder, setAssigningOrder] = useState(null); // ID of order being assigned
     const [selectedBoy, setSelectedBoy] = useState("");
+    const [boyAnalytics, setBoyAnalytics] = useState([]);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -33,6 +34,7 @@ export default function AdminDashboard() {
             fetchSales();
             fetchDeliveryBoys();
             fetchFraudAlerts();
+            fetchBoyAnalytics();
         }
         fetchItems();
         fetchFeedback();
@@ -56,6 +58,7 @@ export default function AdminDashboard() {
     const fetchStaff = () => fetch('/admin/staff').then(r => r.json()).then(d => setStaff(Array.isArray(d) ? d : []));
     const fetchDeliveryBoys = () => fetch('/admin/delivery-boys').then(r => r.json()).then(d => setDeliveryBoys(Array.isArray(d) ? d : [])).catch(() => { });
     const fetchFraudAlerts = () => fetch('/admin/fraud-alerts').then(r => r.json()).then(d => setFraudAlerts(Array.isArray(d) ? d : [])).catch(() => { });
+    const fetchBoyAnalytics = () => fetch('/admin/delivery-boy-analytics').then(r => r.json()).then(d => setBoyAnalytics(Array.isArray(d) ? d : [])).catch(() => { });
     const approveStaff = (id) => fetch(`/admin/approve-staff/${id}`, { method: 'PUT' }).then(() => fetchStaff());
     const deleteStaff = (id) => { if (!confirm('Remove?')) return; fetch(`/admin/delete-staff/${id}`, { method: 'DELETE' }).then(() => fetchStaff()); };
     const approveDeliveryBoy = (id) => fetch(`/admin/delivery-boy/${id}/approve`, { method: 'PUT' }).then(() => fetchDeliveryBoys());
@@ -140,6 +143,7 @@ export default function AdminDashboard() {
         { id: 'feedback', label: 'Reviews', show: true },
         { id: 'sales', label: 'Sales', show: user?.is_super === 1 },
         { id: 'delivery_boys', label: `Delivery Boys${deliveryBoys.filter(b => b.status === 'pending').length > 0 ? ` 🔴${deliveryBoys.filter(b => b.status === 'pending').length}` : ''}`, show: user?.is_super === 1 },
+        { id: 'boy_performance', label: 'Staff Performance', show: user?.is_super === 1 },
         { id: 'fraud', label: `Fraud ${fraudAlerts.filter(f => !f.resolved).length > 0 ? `🚨${fraudAlerts.filter(f => !f.resolved).length}` : ''}`, show: user?.is_super === 1 },
         { id: 'staff', label: 'Staff', show: user?.is_super === 1 },
     ].filter(t => t.show);
@@ -435,6 +439,61 @@ export default function AdminDashboard() {
                                 </div>
                             </div>
                         ))}
+                    </motion.div>
+                )}
+                {/* PERFORMANCE ANALYTICS TAB */}
+                {activeTab === 'boy_performance' && user?.is_super === 1 && (
+                    <motion.div key="performance" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} className="space-y-6">
+                        <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-2xl font-black">Staff Performance Analysis</h3>
+                            <div className="bg-primary/10 text-primary px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-widest">Live Efficiency Data</div>
+                        </div>
+                        <div className="glass-panel rounded-[32px] overflow-hidden">
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left">
+                                    <thead className="bg-slate-50">
+                                        <tr className="border-b border-slate-100">
+                                            <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-light">Delivery Boy</th>
+                                            <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-light text-center">Date</th>
+                                            <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-light text-center">Total Tasks</th>
+                                            <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-light text-center">Completed</th>
+                                            <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-light text-right">Success Rate</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-50">
+                                        {boyAnalytics.map((stat, idx) => (
+                                            <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
+                                                <td className="px-8 py-5">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="p-2 bg-slate-100 rounded-lg"><Bike size={16} className="text-slate-500" /></div>
+                                                        <div>
+                                                            <p className="font-bold text-slate-800">{stat.full_name}</p>
+                                                            <p className="text-[10px] text-light uppercase font-black">ID: #{stat.boy_id}</p>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-8 py-5 text-center font-medium text-slate-600">
+                                                    {new Date(stat.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                                </td>
+                                                <td className="px-8 py-5 text-center font-black text-slate-700">{stat.orders_count}</td>
+                                                <td className="px-8 py-5 text-center font-black text-green-600">{stat.completed_count}</td>
+                                                <td className="px-8 py-5 text-right">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <span className="font-black text-slate-900">{Math.round((stat.completed_count / stat.orders_count) * 100)}%</span>
+                                                        <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                                            <div className="h-full bg-green-500 rounded-full" style={{ width: `${(stat.completed_count / stat.orders_count) * 100}%` }}></div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                        {boyAnalytics.length === 0 && (
+                                            <tr><td colSpan="5" className="px-8 py-20 text-center text-light italic">No performance data found.</td></tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </motion.div>
                 )}
 
