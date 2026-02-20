@@ -74,14 +74,20 @@ export default function DeliveryDashboard() {
 
     const fetchAvailableOrders = () => {
         fetch('/delivery/available-orders')
-            .then(r => r.json())
+            .then(r => {
+                if (r.status === 401 || r.status === 403) { handleLogout(); throw new Error('Unauthorized'); }
+                return r.json();
+            })
             .then(data => setAvailableOrders(Array.isArray(data) ? data : []))
             .catch(() => { });
     };
 
     const fetchMyOrders = () => {
         fetch('/delivery/my-orders')
-            .then(r => r.json())
+            .then(r => {
+                if (r.status === 401 || r.status === 403) { handleLogout(); throw new Error('Unauthorized'); }
+                return r.json();
+            })
             .then(data => setMyOrders(Array.isArray(data) ? data : []))
             .catch(() => { });
     };

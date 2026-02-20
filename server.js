@@ -29,7 +29,8 @@ console.log("=======================================");
 console.log(`🚀 APP STARTING... VERSION: ${BUILD_ID}`);
 console.log("=======================================");
 
-app.use(cors());
+app.set("trust proxy", 1); // Required for secure cookies on Render
+app.use(cors({ origin: true, credentials: true })); // Explicitly allow credentials for session/socket stability
 app.use(bodyParser.json());
 app.use(session({
     secret: process.env.SESSION_SECRET || "adminsecret",
@@ -254,7 +255,8 @@ function generatePin() {
 
 // ================= AUTH MIDDLEWARE =================
 function checkAdmin(req, res, next) {
-    if (req.session.admin) return next();
+    if (req.session && req.session.admin) return next();
+    console.warn("🔐 Auth Fail: No admin session found. IP:", req.ip);
     res.status(401).json({ error: "Admin login required" });
 }
 
