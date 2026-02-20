@@ -12,6 +12,7 @@ import OrderConfirmed from './pages/OrderConfirmed';
 import DeliveryLogin from './pages/DeliveryLogin';
 import DeliveryRegister from './pages/DeliveryRegister';
 import DeliveryDashboard from './pages/DeliveryDashboard';
+import OrderTracking from './pages/OrderTracking';
 import './App.css';
 
 const pageVariants = {
@@ -51,6 +52,7 @@ function App() {
           <Route path="delivery/login" element={<PageWrapper><DeliveryLogin /></PageWrapper>} />
           <Route path="delivery/register" element={<PageWrapper><DeliveryRegister /></PageWrapper>} />
           <Route path="delivery/dashboard" element={<PageWrapper><DeliveryDashboard /></PageWrapper>} />
+          <Route path="order-tracking" element={<PageWrapper><OrderTracking /></PageWrapper>} />
         </Route>
       </Routes>
     </AnimatePresence>

@@ -48,7 +48,6 @@ export default function MyOrders() {
         fetchOrders(phone);
     };
 
-    const activeOrder = orders.find(o => o.status !== 'Delivered' && o.status !== 'Completed');
     const pastOrders = orders.filter(o => o.status === 'Delivered' || o.status === 'Completed');
 
     return (
@@ -82,41 +81,45 @@ export default function MyOrders() {
                     </button>
                 </motion.form>
 
-                {/* Active Order with PIN */}
-                {activeOrder && (
+                {/* Active Orders with PINs */}
+                {orders.filter(o => o.status !== 'Delivered' && o.status !== 'Completed').length > 0 && (
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         className="mb-8"
                     >
-                        <h3 className="text-xl font-black mb-4 text-primary">📦 Active Order</h3>
-                        <div className="active-order-card glass-panel p-8 rounded-[32px] border-2 border-primary/20">
-                            <div className="flex flex-col md:flex-row gap-6 justify-between">
-                                <div>
-                                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase ${statusColors[activeOrder.status] || 'bg-slate-100'}`}>
-                                        {statusIcons[activeOrder.status]} {activeOrder.status}
-                                    </span>
-                                    <h4 className="text-2xl font-black mt-3">Order #{activeOrder.id}</h4>
-                                    <p className="text-light text-sm mt-1">{activeOrder.items_summary}</p>
-                                    <p className="text-primary font-black text-lg mt-2">₹{Number(activeOrder.total).toFixed(2)}</p>
-                                    <p className="text-xs text-light mt-1">{new Date(activeOrder.created_at).toLocaleString('en-IN')}</p>
-                                </div>
-
-                                {/* PIN Display */}
-                                {activeOrder.verification_pin && activeOrder.order_type === 'delivery' && (
-                                    <div className="delivery-pin-card !mb-0 flex-shrink-0">
-                                        <p className="text-xs font-black uppercase tracking-widest text-primary mb-2">🔐 Delivery PIN</p>
-                                        <div className="pin-display">
-                                            {String(activeOrder.verification_pin).split('').map((d, i) => (
-                                                <span key={i} className="pin-digit">{d}</span>
-                                            ))}
+                        <h3 className="text-xl font-black mb-4 text-primary">📦 Active Orders</h3>
+                        <div className="flex flex-col gap-6">
+                            {orders.filter(o => o.status !== 'Delivered' && o.status !== 'Completed').map(activeOrder => (
+                                <div key={activeOrder.id} className="active-order-card glass-panel p-8 rounded-[32px] border-2 border-primary/20">
+                                    <div className="flex flex-col md:flex-row gap-6 justify-between">
+                                        <div>
+                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase ${statusColors[activeOrder.status] || 'bg-slate-100'}`}>
+                                                {statusIcons[activeOrder.status]} {activeOrder.status}
+                                            </span>
+                                            <h4 className="text-2xl font-black mt-3">Order #{activeOrder.id}</h4>
+                                            <p className="text-light text-sm mt-1">{activeOrder.items_summary}</p>
+                                            <p className="text-primary font-black text-lg mt-2">₹{Number(activeOrder.total).toFixed(2)}</p>
+                                            <p className="text-xs text-light mt-1">{new Date(activeOrder.created_at).toLocaleString('en-IN')}</p>
                                         </div>
-                                        <p className="text-xs text-slate-600 mt-3 max-w-[200px] text-center">
-                                            Show this to the delivery boy to receive your order
-                                        </p>
+
+                                        {/* PIN Display */}
+                                        {activeOrder.verification_pin && activeOrder.order_type === 'delivery' && (
+                                            <div className="delivery-pin-card !mb-0 flex-shrink-0">
+                                                <p className="text-xs font-black uppercase tracking-widest text-primary mb-2">🔐 Delivery PIN</p>
+                                                <div className="pin-display">
+                                                    {String(activeOrder.verification_pin).split('').map((d, i) => (
+                                                        <span key={i} className="pin-digit">{d}</span>
+                                                    ))}
+                                                </div>
+                                                <p className="text-xs text-slate-600 mt-3 max-w-[200px] text-center">
+                                                    Show this to the delivery boy to receive your order
+                                                </p>
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-                            </div>
+                                </div>
+                            ))}
                         </div>
                     </motion.div>
                 )}
