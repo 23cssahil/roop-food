@@ -379,6 +379,43 @@ app.post("/api/verify-payment", (req, res) => {
     }
 });
 
+// ================= RAZORPAY WEBHOOK =================
+app.post("/api/razorpay/webhook", (req, res) => {
+    const secret = process.env.RAZORPAY_WEBHOOK_SECRET || "roop_webhook_secret";
+    const signature = req.headers["x-razorpay-signature"];
+
+    try {
+        const expectedSig = crypto.createHmac("sha256", secret)
+            .update(JSON.stringify(req.body)).digest("hex");
+
+        if (expectedSig === signature) {
+            const event = req.body.event;
+            const payload = req.body.payload;
+
+            if (event === "payment.captured") {
+                const paymentId = payload.payment.entity.id;
+                const orderId = payload.payment.entity.order_id;
+
+                console.log(`💰 Webhook: Payment captured for Order ${orderId} (Payment ID: ${paymentId})`);
+
+                db.query(
+                    "UPDATE orders SET payment_status='paid', payment_id=? WHERE payment_id=?",
+                    [paymentId, orderId],
+                    (err) => {
+                        if (err) console.error("❌ Webhook DB Update Failed:", err.message);
+                    }
+                );
+            }
+            res.json({ status: "ok" });
+        } else {
+            res.status(400).send("Invalid signature");
+        }
+    } catch (e) {
+        console.error("Webhook Error:", e.message);
+        res.status(500).send("Internal Error");
+    }
+});
+
 // ================= PLACE ORDER (After Payment or Dine-in) =================
 app.post("/api/order", (req, res) => {
     const { customer_name, phone, items, total, order_type, lat, lng, landmark, payment_status, payment_id } = req.body;
@@ -824,7 +861,8 @@ const indexPath = path.join(distPath, "index.html");
 if (fs.existsSync(distPath)) {
     app.use(express.static(distPath));
     // Serve index.html for all non-API routes (SPA support)
-    app.get("/*", (req, res) => {
+    // In Express 5, unnamed wildcards are not allowed. Using a named parameter.
+    app.get("*path", (req, res) => {
         if (!req.path.startsWith("/api")) {
             res.sendFile(indexPath);
         } else {
