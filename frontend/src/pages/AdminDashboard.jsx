@@ -7,7 +7,8 @@ import { io } from 'socket.io-client';
 let socket = null;
 
 export default function AdminDashboard() {
-    const [activeTab, setActiveTab] = useState('orders');
+    const [user, setUser] = useState(JSON.parse(localStorage.getItem('adminUser')) || null);
+    const [activeTab, setActiveTab] = useState(user?.is_super === 1 ? 'orders' : 'feedback');
     const [orders, setOrders] = useState([]);
     const [items, setItems] = useState([]);
     const [feedback, setFeedback] = useState([]);
@@ -15,7 +16,6 @@ export default function AdminDashboard() {
     const [sales, setSales] = useState([]);
     const [deliveryBoys, setDeliveryBoys] = useState([]);
     const [fraudAlerts, setFraudAlerts] = useState([]);
-    const [user, setUser] = useState(JSON.parse(localStorage.getItem('adminUser')) || null);
     const [newItem, setNewItem] = useState({ name: '', price: '', image_url: '', description: '' });
     const [editItem, setEditItem] = useState(null);
     const [pinInputs, setPinInputs] = useState({});
@@ -111,7 +111,7 @@ export default function AdminDashboard() {
     };
 
     const tabs = [
-        { id: 'orders', label: 'Orders', show: true },
+        { id: 'orders', label: 'Orders', show: user?.is_super === 1 },
         { id: 'menu', label: 'Menu', show: user?.is_super === 1 },
         { id: 'feedback', label: 'Reviews', show: true },
         { id: 'sales', label: 'Sales', show: user?.is_super === 1 },

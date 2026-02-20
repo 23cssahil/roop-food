@@ -522,8 +522,8 @@ app.get("/api/my-orders/:phone", (req, res) => {
     });
 });
 
-// ================= ORDER STATUS =================
-app.get("/admin/orders", checkAdmin, (req, res) => {
+// ================= ORDER STATUS (SUPER ADMIN ONLY) =================
+app.get("/admin/orders", checkSuperAdmin, (req, res) => {
     const sql = `
         SELECT o.*, oi.item_name, oi.qty,
                db.full_name as delivery_boy_name
@@ -535,14 +535,14 @@ app.get("/admin/orders", checkAdmin, (req, res) => {
     db.query(sql, (e, r) => res.json(r || []));
 });
 
-app.put("/admin/order-done/:id", checkAdmin, (req, res) => {
+app.put("/admin/order-done/:id", checkSuperAdmin, (req, res) => {
     db.query("UPDATE orders SET status='Completed' WHERE id=?", [req.params.id], () => {
         io.to("admins").emit("order_status_update", { orderId: req.params.id, status: "Completed" });
         res.json({ success: true });
     });
 });
 
-app.put("/admin/order-out-for-delivery/:id", checkAdmin, (req, res) => {
+app.put("/admin/order-out-for-delivery/:id", checkSuperAdmin, (req, res) => {
     db.query("UPDATE orders SET status='Out for Delivery' WHERE id=?", [req.params.id], (err) => {
         if (err) return res.status(500).json({ error: "Update failed" });
         io.to("admins").emit("order_status_update", { orderId: parseInt(req.params.id), status: "Out for Delivery" });
@@ -552,7 +552,7 @@ app.put("/admin/order-out-for-delivery/:id", checkAdmin, (req, res) => {
 });
 
 // ================= PIN VERIFICATION =================
-app.post("/admin/verify-pin", checkAdmin, (req, res) => {
+app.post("/admin/verify-pin", checkSuperAdmin, (req, res) => {
     const { order_id, pin, delivery_boy_id, delivery_boy_name } = req.body;
     db.query("SELECT verification_pin, pin_attempts, status FROM orders WHERE id=?", [order_id], (err, results) => {
         if (err || !results.length) return res.status(404).json({ error: "Order not found" });
