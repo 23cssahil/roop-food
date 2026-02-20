@@ -116,12 +116,20 @@ export default function Checkout() {
                 if (typeof window.Razorpay !== 'function') {
                     throw new Error('Razorpay failed to initialize. Please refresh the page or disable AdBlock.');
                 }
+                console.log("🚀 Initializing Razorpay modal:", { amount: data.amount, orderId: data.orderId });
                 const rzp = new window.Razorpay(options);
+                rzp.on('payment.failed', (resp) => {
+                    console.error("❌ Razorpay Payment Failed:", resp.error);
+                    setError(`Payment failed: ${resp.error.description}`);
+                    document.body.style.overflow = 'auto';
+                });
                 rzp.open();
             })
             .catch(err => {
+                console.error("❌ Razorpay Catch Error:", err);
                 setError(err.message);
                 setPayLoading(false);
+                document.body.style.overflow = 'auto'; // Force restore scroll on failure
             });
     };
 

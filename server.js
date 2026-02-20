@@ -183,26 +183,31 @@ function runMigrations() {
         });
     });
 
-    // Alter existing orders columns (safe for existing data)
+    console.log("🛠️ Checking database columns...");
     const alterQueries = [
-        "ALTER TABLE orders ADD COLUMN IF NOT EXISTS order_type VARCHAR(20) DEFAULT 'dine_in'",
-        "ALTER TABLE orders ADD COLUMN IF NOT EXISTS verification_pin VARCHAR(10)",
-        "ALTER TABLE orders ADD COLUMN IF NOT EXISTS pin_attempts INT DEFAULT 0",
-        "ALTER TABLE orders ADD COLUMN IF NOT EXISTS lat DECIMAL(10,7)",
-        "ALTER TABLE orders ADD COLUMN IF NOT EXISTS lng DECIMAL(10,7)",
-        "ALTER TABLE orders ADD COLUMN IF NOT EXISTS landmark TEXT",
-        "ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_status VARCHAR(30) DEFAULT 'unpaid'",
-        "ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_id VARCHAR(255)",
-        "ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_boy_id INT"
+        "ALTER TABLE orders ADD COLUMN order_type VARCHAR(20) DEFAULT 'dine_in'",
+        "ALTER TABLE orders ADD COLUMN verification_pin VARCHAR(10)",
+        "ALTER TABLE orders ADD COLUMN pin_attempts INT DEFAULT 0",
+        "ALTER TABLE orders ADD COLUMN lat DECIMAL(10,7)",
+        "ALTER TABLE orders ADD COLUMN lng DECIMAL(10,7)",
+        "ALTER TABLE orders ADD COLUMN landmark TEXT",
+        "ALTER TABLE orders ADD COLUMN payment_status VARCHAR(30) DEFAULT 'unpaid'",
+        "ALTER TABLE orders ADD COLUMN payment_id VARCHAR(255)",
+        "ALTER TABLE orders ADD COLUMN delivery_boy_id INT"
     ];
 
     alterQueries.forEach(sql => {
         db.query(sql, (err) => {
-            if (err && !err.message.includes("Duplicate column")) {
-                // Ignore "column already exists"
+            if (err) {
+                if (err.code === 'ER_DUP_COLUMN_NAME' || err.message.includes("Duplicate column")) {
+                    // This is expected if column exists
+                } else {
+                    console.error("❌ Migration Error:", err.message);
+                }
             }
         });
     });
+    console.log("✅ Database sync process initiated.");
 
     // Sync super admin
     const hashedPassword = bcrypt.hashSync("admin123", 10);

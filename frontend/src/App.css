@@ -41,11 +41,14 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   line-height: 1.6;
-  overflow-x: hidden;
-  overflow-y: auto;
-  /* Ensure vertical scroll is allowed */
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  /* Force scrollable always */
   -webkit-overflow-scrolling: touch;
-  /* Smooth scroll on iOS */
+}
+
+html {
+  overflow-y: auto !important;
 }
 
 /* Prevent blank screen: ensure root always has background */
