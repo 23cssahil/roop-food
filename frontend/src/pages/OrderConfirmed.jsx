@@ -42,7 +42,7 @@ export default function OrderConfirmed() {
                         className="delivery-pin-card mb-8"
                     >
                         <p className="text-xs font-black uppercase tracking-widest text-primary mb-2">
-                            {orderType === 'delivery' ? '🔐 Your Delivery Verification PIN' : '🔐 Your Order PIN'}
+                            🔐 Your Delivery Verification PIN
                         </p>
                         <div className="pin-display">
                             {pin.split('').map((digit, i) => (
@@ -58,9 +58,7 @@ export default function OrderConfirmed() {
                             ))}
                         </div>
                         <p className="text-sm text-slate-600 mt-4 font-medium">
-                            {orderType === 'delivery'
-                                ? '📱 Show this PIN to the delivery boy when your order arrives. Do not share it before!'
-                                : '📋 Share this PIN with hotel staff if asked for verification.'}
+                            📱 Show this PIN to the delivery boy when your order arrives. Do not share it before!
                         </p>
                         <p className="text-xs text-light mt-2">Order #{orderId}</p>
                     </motion.div>

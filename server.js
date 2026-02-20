@@ -430,8 +430,8 @@ app.post("/api/order", (req, res) => {
         return res.status(400).json({ error: "Missing required order fields" });
     }
 
-    const pin = generatePin();
     const type = order_type || "dine_in";
+    const pin = type === "delivery" ? generatePin() : null;
     const payStatus = payment_status || (type === "dine_in" ? "cash" : "unpaid");
 
     console.log(`📦 Placing ${type} order for ${customer_name} (Total: ₹${total})`);

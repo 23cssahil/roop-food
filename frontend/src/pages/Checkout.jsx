@@ -103,6 +103,7 @@ export default function Checkout() {
                                     setPaymentId(v.payment_id);
                                     setPayLoading(false);
                                     setError(null);
+                                    document.body.style.overflow = 'auto'; // Restore scroll
                                 } else {
                                     setError('Payment verification failed. Please try again.');
                                     setPayLoading(false);
@@ -111,7 +112,12 @@ export default function Checkout() {
                     },
                     prefill: { name: formData.customer_name, contact: formData.phone },
                     theme: { color: '#FF6B2B' },
-                    modal: { ondismiss: () => setPayLoading(false) }
+                    modal: {
+                        ondismiss: () => {
+                            setPayLoading(false);
+                            document.body.style.overflow = 'auto'; // Restore scroll on close
+                        }
+                    }
                 };
                 if (typeof window.Razorpay !== 'function') {
                     throw new Error('Razorpay failed to initialize. Please refresh the page or disable AdBlock.');
@@ -162,17 +168,31 @@ export default function Checkout() {
             const data = await res.json();
 
             if (res.ok && data.success) {
-                // Save phone to localStorage for My Orders
                 localStorage.setItem('roop-customer-phone', formData.phone);
                 clearCart();
-                // WhatsApp notification
+
+                // WhatsApp notification formatting
                 const locationText = location
                     ? `https://www.google.com/maps/search/?api=1&query=${location.lat},${location.lng}`
                     : 'Dine-in';
-                const landmarkText = landmark ? `%0ALandmark: ${landmark}` : '';
-                const message = `*New Order #${data.orderId}!*%0A%0A*Customer:* ${formData.customer_name}%0A*Phone:* ${formData.phone}%0A*Type:* ${orderType === 'delivery' ? '🛵 Delivery' : '🍽️ Dine-in'}%0A*Location:* ${locationText}${landmarkText}%0A%0A*Items:*%0A${cart.map(i => `- ${i.name} (x${i.qty})`).join('%0A')}%0A%0A*Total:* ₹${total.toFixed(2)}%0A*Payment:* ${orderType === 'delivery' ? `Paid (${paymentId})` : 'Cash'}`;
-                window.open(`https://wa.me/919120322488?text=${message}`, '_blank');
-                navigate('/order-confirmed', { state: { orderId: data.orderId, pin: data.pin, orderType, customerName: formData.customer_name } });
+                const landmarkText = landmark ? `\nLandmark: ${landmark}` : '';
+                const itemsList = cart.map(i => `- ${i.name} (x${i.qty})`).join('\n');
+
+                const message = `*New Order #${data.orderId}!*
+
+*Customer:* ${formData.customer_name}
+*Phone:* ${formData.phone}
+*Type:* ${orderType === 'delivery' ? '🛵 Delivery' : '🍽️ Dine-in'}
+*Location:* ${locationText}${landmarkText}
+
+*Items:*
+${itemsList}
+
+*Total:* ₹${total.toFixed(2)}
+*Payment:* ${orderType === 'delivery' ? `Paid (${paymentId})` : 'Cash'}`;
+
+                window.open(`https://wa.me/919120322488?text=${encodeURIComponent(message)}`, '_blank');
+                navigate('/order-confirmed', { state: { orderId: data.orderId, pin: data.pin || null, orderType, customerName: formData.customer_name } });
             } else {
                 console.error("Backend Order Error:", data);
                 throw new Error(data.error || 'Order failed');
