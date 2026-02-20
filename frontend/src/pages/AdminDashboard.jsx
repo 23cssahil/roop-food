@@ -25,8 +25,15 @@ export default function AdminDashboard() {
 
     useEffect(() => {
         if (!user) { navigate('/admin'); return; }
-        fetchOrders(); fetchItems(); fetchFeedback();
-        if (user.is_super) { fetchStaff(); fetchSales(); fetchDeliveryBoys(); fetchFraudAlerts(); }
+        if (user.is_super === 1) {
+            fetchOrders();
+            fetchStaff();
+            fetchSales();
+            fetchDeliveryBoys();
+            fetchFraudAlerts();
+        }
+        fetchItems();
+        fetchFeedback();
         initSocket();
         return () => { if (socket) socket.disconnect(); };
     }, [user]);

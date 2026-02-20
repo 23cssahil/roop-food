@@ -40,6 +40,11 @@ app.use(session({
 }));
 
 // ================= RAZORPAY =================
+// Check keys on startup
+if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+    console.warn("⚠️ RAZORPAY API KEYS MISSING! Payments will fail. Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in Environment Variables.");
+}
+
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_placeholder",
     key_secret: process.env.RAZORPAY_KEY_SECRET || "placeholder_secret"

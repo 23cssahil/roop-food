@@ -72,9 +72,9 @@ export default function Checkout() {
             return;
         }
         const rzpKey = import.meta.env.VITE_RAZORPAY_KEY;
-        if (!rzpKey || rzpKey === 'your_razorpay_key_id') {
+        if (!rzpKey || rzpKey.includes('your_razorpay') || rzpKey === 'rzp_test_placeholder') {
             console.error("⛔ VITE_RAZORPAY_KEY is missing or invalid!");
-            setError('Payment system is not configured. Please contact support (Missing API Key).');
+            setError('Payment system is not configured. Please add the VITE_RAZORPAY_KEY environment variable in Render Settings.');
             setPayLoading(false);
             return;
         }
@@ -245,7 +245,11 @@ ${itemsList}
                 <div className="flex gap-4">
                     <button
                         type="button"
-                        onClick={() => setOrderType('dine_in')}
+                        onClick={() => {
+                            setOrderType('dine_in');
+                            setLocation(null);
+                            setLocError('');
+                        }}
                         className={`order-type-btn ${orderType === 'dine_in' ? 'order-type-btn--active' : ''}`}
                     >
                         <Home size={20} />

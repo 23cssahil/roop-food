@@ -252,14 +252,21 @@ export default function DeliveryDashboard() {
                                             )}
                                         </div>
 
-                                        {/* Map Link */}
-                                        {order.lat && order.lng && (
-                                            <a href={`https://www.google.com/maps/search/?api=1&query=${order.lat},${order.lng}`}
-                                                target="_blank" rel="noopener noreferrer"
-                                                className="btn btn-outline w-full mb-4 text-sm">
-                                                <Navigation size={16} /> View on Google Maps
-                                            </a>
-                                        )}
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                                            {order.lat && order.lng && (
+                                                <button onClick={() => navigate('/order-tracking', { state: { order } })}
+                                                    className="btn btn-primary text-sm flex items-center justify-center gap-2">
+                                                    <Navigation size={16} /> Track & Navigate
+                                                </button>
+                                            )}
+                                            {order.lat && order.lng && (
+                                                <a href={`https://www.google.com/maps/search/?api=1&query=${order.lat},${order.lng}`}
+                                                    target="_blank" rel="noopener noreferrer"
+                                                    className="btn btn-outline text-sm flex items-center justify-center gap-2">
+                                                    <MapPin size={16} /> Maps Link
+                                                </a>
+                                            )}
+                                        </div>
 
                                         {/* PIN Verification */}
                                         {order.status !== 'Delivered' && (
