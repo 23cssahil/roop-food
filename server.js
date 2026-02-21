@@ -412,7 +412,7 @@ app.post("/api/verify-payment", (req, res) => {
 
 // ================= RAZORPAY WEBHOOK =================
 app.post("/api/razorpay/webhook", (req, res) => {
-    const secret = process.env.RAZORPAY_WEBHOOK_SECRET || "roop_webhook_secret";
+    const secret = process.env.RAZORPAY_WEBHOOK_SECRET || "wp_KRfQ75rNYsEB";
     const signature = req.headers["x-razorpay-signature"];
 
     try {
